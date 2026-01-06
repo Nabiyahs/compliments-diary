@@ -11,6 +11,7 @@ import { WeekView } from '@/components/calendar/week-view'
 import { DayView } from '@/components/day/day-view'
 import { formatDateString } from '@/lib/utils'
 import { getDictionarySync, type Locale, appTitles, isValidLocale, i18n } from '@/lib/i18n'
+import { clearSessionTracking } from '@/lib/auth/session-persistence'
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -89,6 +90,7 @@ export default function AppPage({ params }: Props) {
   const handleLogout = async () => {
     await supabase.auth.signOut()
     resetSupabaseClient()
+    clearSessionTracking()
     router.replace(`/${locale}/login`)
   }
 

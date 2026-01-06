@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "하루꾹",
+    "title": "오늘꾹",
     "tagline": "매일의 작은 칭찬을 기록하세요",
     "loading": "로딩 중..."
   },
@@ -19,7 +19,7 @@
   "onboarding": {
     "skip": "건너뛰기",
     "next": "다음",
-    "startJourney": "시작하기",
+    "startJourney": "오늘꾹 하러 가기",
     "steps": {
       "daily": {
         "title": "매일의 순간을 기록하세요",
@@ -57,6 +57,7 @@
     "sendResetLink": "재설정 링크 보내기",
     "sending": "전송 중...",
     "termsAgreement": "회원가입 시 서비스 이용약관에 동의하게 됩니다.",
+    "keepLoggedIn": "로그인 유지",
     "errors": {
       "invalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다.",
       "emailNotConfirmed": "이메일 인증을 완료해주세요. 받은 편지함을 확인해주세요.",

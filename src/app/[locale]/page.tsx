@@ -9,11 +9,16 @@ type Props = {
 
 /**
  * Root page routing logic:
- * 1. If user has valid session → redirect to /[locale]/app (Daily view)
- * 2. If not authenticated → show EntryRouter (client component)
- *    - EntryRouter checks localStorage for onboarding_completed
- *    - If completed → redirect to /[locale]/login
- *    - If not completed → redirect to /[locale]/onboarding
+ *
+ * The intro/onboarding flow should ALWAYS be shown first for new sessions.
+ *
+ * 1. If user has valid session AND has completed onboarding → redirect to /[locale]/app
+ * 2. Otherwise → show EntryRouter (client component)
+ *    - EntryRouter will check localStorage for onboarding_completed
+ *    - Always show intro first for new users
+ *    - For returning users who completed onboarding:
+ *      - If logged in → go to app
+ *      - If not logged in → go to login
  */
 export default async function RootPage({ params }: Props) {
   const { locale: localeParam } = await params
@@ -21,12 +26,8 @@ export default async function RootPage({ params }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // If user is authenticated, redirect directly to app
-  if (user) {
-    redirect(`/${locale}/app`)
-  }
-
-  // For unauthenticated users, use client-side EntryRouter
-  // to check onboarding status (stored in localStorage)
-  return <EntryRouter locale={locale} />
+  // For authenticated users, we still use EntryRouter to check onboarding status
+  // since onboarding_completed is in localStorage (client-side only)
+  // EntryRouter will route to /app if onboarding is completed, or /onboarding if not
+  return <EntryRouter locale={locale} isAuthenticated={!!user} />
 }

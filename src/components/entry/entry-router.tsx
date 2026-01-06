@@ -4,32 +4,67 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { type Locale, appTitles } from '@/lib/i18n/config'
+import { shouldSignOutOnNewSession, clearSessionTracking } from '@/lib/auth/session-persistence'
+import { createClient } from '@/lib/supabase/client'
 
 const ONBOARDING_KEY = 'onboarding_completed'
 
 interface EntryRouterProps {
   locale: Locale
+  isAuthenticated: boolean
 }
 
 /**
- * Client-side router for unauthenticated users.
- * Checks if onboarding is completed and routes accordingly.
+ * Client-side router for entry point.
+ * Routes based on onboarding completion status and auth state.
+ *
+ * Flow:
+ * - First time users: Always show onboarding
+ * - Returning users who completed onboarding:
+ *   - If logged in → go to app
+ *   - If not logged in → go to login
+ *
+ * Also handles "Keep me logged in" session management.
  */
-export function EntryRouter({ locale }: EntryRouterProps) {
+export function EntryRouter({ locale, isAuthenticated }: EntryRouterProps) {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if onboarding has been completed
-    const completed = localStorage.getItem(ONBOARDING_KEY)
+    const handleRouting = async () => {
+      const completed = localStorage.getItem(ONBOARDING_KEY) === 'true'
 
-    if (completed === 'true') {
-      // Already completed onboarding, go to login
-      router.replace(`/${locale}/login`)
-    } else {
-      // First time user, show onboarding
-      router.replace(`/${locale}/onboarding`)
+      // Check if we should sign out due to "remember me" being off
+      if (isAuthenticated && shouldSignOutOnNewSession()) {
+        try {
+          const supabase = createClient()
+          await supabase.auth.signOut()
+          clearSessionTracking()
+          // After sign out, proceed as unauthenticated
+          if (completed) {
+            router.replace(`/${locale}/login`)
+          } else {
+            router.replace(`/${locale}/onboarding`)
+          }
+          return
+        } catch {
+          // If sign out fails, continue with normal flow
+        }
+      }
+
+      if (!completed) {
+        // First time user - show onboarding
+        router.replace(`/${locale}/onboarding`)
+      } else if (isAuthenticated) {
+        // Completed onboarding and logged in - go to app
+        router.replace(`/${locale}/app`)
+      } else {
+        // Completed onboarding but not logged in - go to login
+        router.replace(`/${locale}/login`)
+      }
     }
-  }, [router, locale])
+
+    handleRouting()
+  }, [router, locale, isAuthenticated])
 
   // Show loading while checking
   return (

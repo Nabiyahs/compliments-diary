@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Mail, Lock, Loader2, AlertCircle, CheckCircle, Bug, Eye, EyeOff } from 'lucide-react'
 import { getDictionarySync, type Locale, appTitles, isValidLocale, i18n } from '@/lib/i18n'
+import { getRememberMe, setRememberMe } from '@/lib/auth/session-persistence'
 
 type AuthMode = 'login' | 'signup' | 'forgot'
 
@@ -23,9 +24,15 @@ function LoginFormContent({ locale }: { locale: Locale }) {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [showDebug, setShowDebug] = useState(false)
+  const [rememberMe, setRememberMeState] = useState(true)
 
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  // Load saved "remember me" preference on mount
+  useEffect(() => {
+    setRememberMeState(getRememberMe())
+  }, [])
 
   // Check for error/success params from auth callback
   useEffect(() => {
@@ -59,11 +66,19 @@ function LoginFormContent({ locale }: { locale: Locale }) {
     setConfirmPassword('')
   }
 
+  const handleRememberMeChange = (checked: boolean) => {
+    setRememberMeState(checked)
+    setRememberMe(checked)
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     setMessage(null)
+
+    // Save the remember me preference before login
+    setRememberMe(rememberMe)
 
     const supabase = createClient()
 
@@ -298,7 +313,17 @@ function LoginFormContent({ locale }: { locale: Locale }) {
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              {/* Keep me logged in + Forgot password row */}
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => handleRememberMeChange(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-[#F27430] focus:ring-amber-400 cursor-pointer"
+                  />
+                  <span className="text-sm text-gray-600">{dict.login.keepLoggedIn}</span>
+                </label>
                 <button
                   type="button"
                   onClick={() => { setMode('forgot'); resetForm(); }}
@@ -485,6 +510,10 @@ function LoginFormContent({ locale }: { locale: Locale }) {
                   <p>
                     <span className="text-gray-500">Supabase URL:</span>{' '}
                     {process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET'}
+                  </p>
+                  <p>
+                    <span className="text-gray-500">Remember Me:</span>{' '}
+                    {rememberMe ? 'ON' : 'OFF'}
                   </p>
                 </div>
               )}

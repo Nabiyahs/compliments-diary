@@ -11,7 +11,7 @@ export const localeNames: Record<Locale, string> = {
 }
 
 export const appTitles: Record<Locale, string> = {
-  ko: '하루꾹',
+  ko: '오늘꾹',
   en: 'DayPat',
 }
 

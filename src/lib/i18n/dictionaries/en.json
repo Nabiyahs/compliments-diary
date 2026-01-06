@@ -19,7 +19,7 @@
   "onboarding": {
     "skip": "Skip",
     "next": "Next",
-    "startJourney": "Start Your Journey",
+    "startJourney": "Go To Pat My Day",
     "steps": {
       "daily": {
         "title": "Capture Daily Moments",
@@ -57,6 +57,7 @@
     "sendResetLink": "Send reset link",
     "sending": "Sending...",
     "termsAgreement": "By signing up, you agree to our terms of service.",
+    "keepLoggedIn": "Keep me logged in",
     "errors": {
       "invalidCredentials": "Invalid email or password. Please check your credentials.",
       "emailNotConfirmed": "Please confirm your email address before signing in. Check your inbox.",
