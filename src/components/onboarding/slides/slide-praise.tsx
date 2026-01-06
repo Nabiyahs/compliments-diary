@@ -5,7 +5,7 @@ import Image from 'next/image'
 /**
  * Slide 1: Daily Praise Polaroid
  * Design based on daily.html reference - warm amber/yellow theme
- * Visual: Polaroid card with sample photo and "참 잘했어요" stamp
+ * Visual: Polaroid card with intro-1.jpg photo and compliment-seal.jpg stamp
  */
 export function SlidePraise() {
   return (
@@ -14,28 +14,18 @@ export function SlidePraise() {
       <div className="relative">
         {/* Main Polaroid Frame */}
         <div className="bg-white rounded-3xl shadow-2xl p-5 transform rotate-[-2deg] w-72">
-          {/* Photo area - uses intro-1.jpg if available, otherwise gradient */}
-          <div className="bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 rounded-2xl overflow-hidden mb-4 relative h-64">
-            {/* Sample content for polaroid */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              {/* Soft background pattern */}
-              <div className="absolute inset-0 opacity-20">
-                <div className="absolute top-4 left-4 text-4xl">☀️</div>
-                <div className="absolute bottom-8 right-6 text-3xl">🌸</div>
-              </div>
+          {/* Photo area - uses intro-1.jpg */}
+          <div className="rounded-2xl overflow-hidden mb-4 relative h-64">
+            <Image
+              src="/intro-1.jpg"
+              alt="오늘의 기록"
+              fill
+              className="object-cover"
+              priority
+            />
 
-              {/* Sample text content */}
-              <div className="relative z-10 text-center px-6">
-                <p className="text-gray-700 text-lg leading-relaxed font-medium">
-                  오늘 아침에 일찍 일어나서
-                  <br />
-                  운동을 했다 💪
-                </p>
-              </div>
-            </div>
-
-            {/* Stickers - top right like in daily.html */}
-            <div className="absolute top-3 right-3 flex gap-2">
+            {/* Stickers overlay - top right like in daily.html */}
+            <div className="absolute top-3 right-3 flex gap-2 z-10">
               <span className="text-2xl drop-shadow-md">☕</span>
               <span className="text-2xl drop-shadow-md">✨</span>
             </div>
