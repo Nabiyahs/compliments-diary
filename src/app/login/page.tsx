@@ -3,8 +3,20 @@
 import { useState, useEffect, Suspense } from 'react'
 import { createClient, setRememberMe, getRememberMe, resetSupabaseClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Mail, Lock, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { Mail, Lock, Loader2, AlertCircle, CheckCircle, Bug } from 'lucide-react'
 import { motion } from 'framer-motion'
+
+// Get package version for diagnostics
+const SUPABASE_JS_VERSION = '2.89.0' // From package.json
+
+interface AuthDebugInfo {
+  supabaseUrl: string | undefined
+  hasAnonKey: boolean
+  provider: string
+  redirectTo: string
+  error: string | null
+  timestamp: string
+}
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -14,6 +26,8 @@ function LoginForm() {
   const [rememberMe, setRememberMeState] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [showDebug, setShowDebug] = useState(false)
+  const [debugInfo, setDebugInfo] = useState<AuthDebugInfo | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -24,7 +38,16 @@ function LoginForm() {
     const errorDesc = searchParams.get('error_description')
 
     if (errorParam) {
-      setError(errorDesc || `Authentication error: ${errorParam}`)
+      let errorMessage = errorDesc || `Authentication error: ${errorParam}`
+
+      // Provide more helpful messages for common errors
+      if (errorParam === 'access_denied') {
+        errorMessage = 'Access was denied. Please try again or use a different login method.'
+      } else if (errorParam === 'unsupported_provider' || errorDesc?.includes('unsupported')) {
+        errorMessage = 'Kakao login is not enabled. Please check the Supabase dashboard configuration.'
+      }
+
+      setError(errorMessage)
     }
 
     // Initialize remember me state
@@ -88,24 +111,65 @@ function LoginForm() {
     resetSupabaseClient()
     const supabase = createClient()
 
+    const redirectTo = `${window.location.origin}/auth/callback?next=/app`
+
+    // Log diagnostic info
+    const diagnosticInfo: AuthDebugInfo = {
+      supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      provider: 'kakao',
+      redirectTo,
+      error: null,
+      timestamp: new Date().toISOString(),
+    }
+
+    console.log('[Kakao Auth] Starting OAuth flow:', {
+      supabaseJsVersion: SUPABASE_JS_VERSION,
+      ...diagnosticInfo,
+    })
+
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo,
+          skipBrowserRedirect: false,
         },
       })
-      if (error) throw error
-      // OAuth will redirect, so we don't need to do anything here
+
+      console.log('[Kakao Auth] Response:', { data, error })
+
+      if (error) {
+        diagnosticInfo.error = error.message
+        setDebugInfo(diagnosticInfo)
+
+        // Check for specific error types
+        if (error.message.includes('unsupported') || error.message.includes('provider')) {
+          throw new Error(
+            'Kakao provider is not enabled in your Supabase project. ' +
+            'Please enable it in the Supabase Dashboard under Authentication > Providers > Kakao.'
+          )
+        }
+        throw error
+      }
+
+      // OAuth should redirect, but if data.url exists, redirect manually
+      if (data?.url) {
+        window.location.href = data.url
+      }
     } catch (err) {
       console.error('[Login] Kakao OAuth error:', err)
+      diagnosticInfo.error = err instanceof Error ? err.message : 'Unknown error'
+      setDebugInfo(diagnosticInfo)
       setError(err instanceof Error ? err.message : 'An error occurred')
       setLoading(false)
     }
   }
 
+  const isDev = process.env.NODE_ENV === 'development'
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -115,7 +179,7 @@ function LoginForm() {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
-              Praise Calendar
+              Praise Journal
             </h1>
             <p className="text-gray-500 text-sm">
               Your daily praise journal with polaroid memories
@@ -182,7 +246,7 @@ function LoginForm() {
                   placeholder="you@example.com"
                   required
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                 />
               </div>
             </div>
@@ -201,7 +265,7 @@ function LoginForm() {
                   required
                   minLength={6}
                   disabled={loading}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                 />
               </div>
             </div>
@@ -214,7 +278,7 @@ function LoginForm() {
                 checked={rememberMe}
                 onChange={(e) => handleRememberMeChange(e.target.checked)}
                 disabled={loading}
-                className="h-4 w-4 text-amber-500 focus:ring-amber-400 border-gray-300 rounded cursor-pointer"
+                className="h-4 w-4 text-pink-500 focus:ring-pink-400 border-gray-300 rounded cursor-pointer"
               />
               <label
                 htmlFor="remember-me"
@@ -227,7 +291,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-pink-400 to-purple-400 hover:from-pink-500 hover:to-purple-500 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -249,11 +313,45 @@ function LoginForm() {
                 setMessage(null)
               }}
               disabled={loading}
-              className="text-amber-600 hover:text-amber-700 font-medium disabled:opacity-50"
+              className="text-pink-600 hover:text-pink-700 font-medium disabled:opacity-50"
             >
               {isSignUp ? 'Sign In' : 'Sign Up'}
             </button>
           </p>
+
+          {/* Debug Panel (Development only) */}
+          {isDev && (
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <button
+                onClick={() => setShowDebug(!showDebug)}
+                className="flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600"
+              >
+                <Bug className="w-4 h-4" />
+                {showDebug ? 'Hide' : 'Show'} Debug Info
+              </button>
+
+              {showDebug && (
+                <div className="mt-3 p-3 bg-gray-50 rounded-lg text-xs font-mono space-y-1">
+                  <p><span className="text-gray-500">Supabase JS:</span> v{SUPABASE_JS_VERSION}</p>
+                  <p><span className="text-gray-500">URL:</span> {process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET'}</p>
+                  <p><span className="text-gray-500">Key:</span> {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '***SET***' : 'NOT SET'}</p>
+                  <p><span className="text-gray-500">Origin:</span> {typeof window !== 'undefined' ? window.location.origin : 'N/A'}</p>
+                  {debugInfo && (
+                    <>
+                      <hr className="border-gray-200 my-2" />
+                      <p className="text-gray-500">Last Auth Attempt:</p>
+                      <p><span className="text-gray-500">Provider:</span> {debugInfo.provider}</p>
+                      <p><span className="text-gray-500">Redirect:</span> {debugInfo.redirectTo}</p>
+                      {debugInfo.error && (
+                        <p className="text-red-500"><span className="text-gray-500">Error:</span> {debugInfo.error}</p>
+                      )}
+                      <p><span className="text-gray-500">Time:</span> {debugInfo.timestamp}</p>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
@@ -262,11 +360,11 @@ function LoginForm() {
 
 function LoginFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-4" />
+            <Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto mb-4" />
             <p className="text-gray-500">Loading...</p>
           </div>
         </div>
