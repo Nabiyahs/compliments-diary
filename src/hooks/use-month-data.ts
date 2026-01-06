@@ -2,8 +2,16 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import type { MonthDayData } from '@/types/database'
 import { getMonthRange } from '@/lib/utils'
+
+export interface MonthDayData {
+  date: string
+  praiseCount: number
+  photoUrl: string | null
+  hasStamp: boolean
+  caption: string | null
+  stickers: string[]
+}
 
 export function useMonthData(year: number, month: number) {
   const [data, setData] = useState<Map<string, MonthDayData>>(new Map())
@@ -25,7 +33,7 @@ export function useMonthData(year: number, month: number) {
           .lte('praise_date', end),
         supabase
           .from('day_cards')
-          .select('card_date, photo_url')
+          .select('card_date, photo_url, caption, sticker_state')
           .gte('card_date', start)
           .lte('card_date', end),
         supabase
@@ -46,10 +54,21 @@ export function useMonthData(year: number, month: number) {
         praiseCounts.set(p.praise_date, count + 1)
       })
 
-      // Create photo URL map
-      const photoUrls = new Map<string, string | null>()
+      // Create day card data map
+      const dayCardData = new Map<string, { photoUrl: string | null; caption: string | null; stickers: string[] }>()
       dayCardsRes.data?.forEach((c) => {
-        photoUrls.set(c.card_date, c.photo_url)
+        // Extract emoji stickers from sticker_state
+        const stickers: string[] = []
+        if (c.sticker_state && Array.isArray(c.sticker_state)) {
+          c.sticker_state.forEach((s: { emoji?: string }) => {
+            if (s.emoji) stickers.push(s.emoji)
+          })
+        }
+        dayCardData.set(c.card_date, {
+          photoUrl: c.photo_url,
+          caption: c.caption,
+          stickers,
+        })
       })
 
       // Create stamp set
@@ -61,16 +80,19 @@ export function useMonthData(year: number, month: number) {
       // Get all unique dates
       const allDates = new Set([
         ...praiseCounts.keys(),
-        ...photoUrls.keys(),
+        ...dayCardData.keys(),
         ...stampDates,
       ])
 
       allDates.forEach((date) => {
+        const cardData = dayCardData.get(date)
         monthData.set(date, {
           date,
           praiseCount: praiseCounts.get(date) || 0,
-          photoUrl: photoUrls.get(date) || null,
+          photoUrl: cardData?.photoUrl || null,
           hasStamp: stampDates.has(date),
+          caption: cardData?.caption || null,
+          stickers: cardData?.stickers || [],
         })
       })
 

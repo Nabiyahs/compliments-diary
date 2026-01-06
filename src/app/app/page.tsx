@@ -2,31 +2,21 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSupabase } from '@/lib/supabase/client'
-import { Calendar, CalendarDays, Sun, Loader2 } from 'lucide-react'
+import { useSupabase, resetSupabaseClient } from '@/lib/supabase/client'
+import { Loader2 } from 'lucide-react'
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js'
-import { Tabs } from '@/components/ui/tabs'
-import { Modal } from '@/components/ui/modal'
-import { UserMenu } from '@/components/auth/user-menu'
+import { Header, ViewTabs, SideDrawer, BottomNav, type ViewType } from '@/components/shell'
 import { MonthView } from '@/components/calendar/month-view'
 import { WeekView } from '@/components/calendar/week-view'
 import { DayView } from '@/components/day/day-view'
 import { formatDateString } from '@/lib/utils'
 
-type ViewTab = 'month' | 'week' | 'day'
-
-const TABS = [
-  { id: 'month', label: 'Month', icon: <Calendar className="w-4 h-4" /> },
-  { id: 'week', label: 'Week', icon: <CalendarDays className="w-4 h-4" /> },
-  { id: 'day', label: 'Day', icon: <Sun className="w-4 h-4" /> },
-]
-
 export default function AppPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<ViewTab>('month')
+  const [activeView, setActiveView] = useState<ViewType>('day') // Day is the main/default view
   const [selectedDate, setSelectedDate] = useState(formatDateString(new Date()))
-  const [showDayModal, setShowDayModal] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const router = useRouter()
   const supabase = useSupabase()
 
@@ -79,23 +69,23 @@ export default function AppPage() {
 
   const handleSelectDate = (date: string) => {
     setSelectedDate(date)
-    if (activeTab !== 'day') {
-      setShowDayModal(true)
+    // Switch to day view when selecting a date from month/week
+    if (activeView !== 'day') {
+      setActiveView('day')
     }
   }
 
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as ViewTab)
-    if (tab === 'day') {
-      setShowDayModal(false)
-    }
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    resetSupabaseClient()
+    router.replace('/login')
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto mb-4" />
           <p className="text-gray-500 text-sm">Loading...</p>
         </div>
       </div>
@@ -107,59 +97,52 @@ export default function AppPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
-      {/* Header */}
-      <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-gray-800">
-            Praise Calendar
-          </h1>
-          <UserMenu user={user} />
-        </div>
-      </header>
-
-      {/* Navigation Tabs */}
-      <div className="sticky top-[57px] z-10 bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 px-4 py-3">
-        <div className="max-w-lg mx-auto">
-          <Tabs
-            tabs={TABS}
-            activeTab={activeTab}
-            onChange={handleTabChange}
-          />
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+      {/* Fixed Header with View Tabs */}
+      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-pink-100 z-50">
+        <Header
+          onMenuClick={() => setDrawerOpen(true)}
+          onAddClick={() => {
+            setSelectedDate(formatDateString(new Date()))
+            setActiveView('day')
+          }}
+        />
+        <ViewTabs
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
       </div>
 
-      {/* Main Content */}
-      <main className="px-4 py-6">
-        {activeTab === 'month' && (
-          <MonthView onSelectDate={handleSelectDate} />
-        )}
-        {activeTab === 'week' && (
-          <WeekView onSelectDate={handleSelectDate} />
-        )}
-        {activeTab === 'day' && (
+      {/* Side Drawer */}
+      <SideDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onLogout={handleLogout}
+      />
+
+      {/* Main Content - matches reference: pt-[140px] pb-24 px-5 */}
+      <main className="pt-[140px] pb-24 px-5">
+        {activeView === 'day' && (
           <DayView
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
           />
+        )}
+        {activeView === 'week' && (
+          <WeekView onSelectDate={handleSelectDate} />
+        )}
+        {activeView === 'month' && (
+          <MonthView onSelectDate={handleSelectDate} />
         )}
       </main>
 
-      {/* Day View Modal (for month/week views) */}
-      <Modal
-        isOpen={showDayModal}
-        onClose={() => setShowDayModal(false)}
-        title="Day View"
-        className="md:max-w-lg"
-      >
-        <div className="bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50 min-h-[60vh]">
-          <DayView
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
-            onClose={() => setShowDayModal(false)}
-          />
-        </div>
-      </Modal>
+      {/* Bottom Navigation */}
+      <BottomNav
+        onAddClick={() => {
+          setSelectedDate(formatDateString(new Date()))
+          setActiveView('day')
+        }}
+      />
     </div>
   )
 }
