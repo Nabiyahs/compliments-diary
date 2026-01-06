@@ -67,7 +67,7 @@ export function MonthView({ locale, onSelectDate }: MonthViewProps) {
     let topMood = '😊'
 
     monthData.forEach((data) => {
-      if (data.praiseCount > 0 || data.photoUrl) {
+      if (data.praiseCount > 0 || data.thumbUrl) {
         totalEntries++
         currentStreak++
         if (currentStreak > streak) streak = currentStreak
@@ -79,15 +79,15 @@ export function MonthView({ locale, onSelectDate }: MonthViewProps) {
     return { totalEntries, streak, topMood }
   }, [monthData])
 
-  // Get top moments
+  // Get top moments (using thumbUrl for the list)
   const topMoments = useMemo(() => {
     const defaultCaption = locale === 'ko' ? '아름다운 순간' : 'Beautiful moment'
-    const moments: { date: string; photoUrl: string; caption: string }[] = []
+    const moments: { date: string; thumbUrl: string; caption: string }[] = []
     monthData.forEach((data, dateStr) => {
-      if (data.photoUrl) {
+      if (data.thumbUrl) {
         moments.push({
           date: dateStr,
-          photoUrl: data.photoUrl,
+          thumbUrl: data.thumbUrl,
           caption: data.caption || defaultCaption,
         })
       }
@@ -156,7 +156,7 @@ export function MonthView({ locale, onSelectDate }: MonthViewProps) {
             const isCurrentMonth = isSameMonth(date, currentMonth)
             const dayData = monthData.get(dateStr)
             const isCurrentDay = isToday(date)
-            const hasPhoto = dayData?.photoUrl && isCurrentMonth
+            const hasPhoto = dayData?.thumbUrl && isCurrentMonth
 
             // Empty placeholder for non-month days at the beginning
             if (!isCurrentMonth && index < 7) {
@@ -203,10 +203,10 @@ export function MonthView({ locale, onSelectDate }: MonthViewProps) {
                   {date.getDate()}
                 </span>
 
-                {/* Photo thumbnail */}
-                {hasPhoto && dayData?.photoUrl && (
+                {/* Photo thumbnail (using thumb_url only - never load original in calendar) */}
+                {hasPhoto && dayData?.thumbUrl && (
                   <img
-                    src={dayData.photoUrl}
+                    src={dayData.thumbUrl}
                     alt=""
                     className="w-full h-full object-cover rounded-lg"
                     loading="lazy"
@@ -275,7 +275,7 @@ export function MonthView({ locale, onSelectDate }: MonthViewProps) {
                 >
                   <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
                     <img
-                      src={moment.photoUrl}
+                      src={moment.thumbUrl}
                       alt=""
                       className="w-full h-full object-cover"
                     />

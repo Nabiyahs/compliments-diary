@@ -38,6 +38,7 @@ export interface Database {
           user_id: string
           card_date: string
           photo_url: string | null
+          thumb_url: string | null // Thumbnail for calendar views
           caption: string | null
           sticker_state: Json
           updated_at: string
@@ -47,6 +48,7 @@ export interface Database {
           user_id: string
           card_date: string
           photo_url?: string | null
+          thumb_url?: string | null
           caption?: string | null
           sticker_state?: Json
           updated_at?: string
@@ -56,6 +58,7 @@ export interface Database {
           user_id?: string
           card_date?: string
           photo_url?: string | null
+          thumb_url?: string | null
           caption?: string | null
           sticker_state?: Json
           updated_at?: string
@@ -144,6 +147,7 @@ export interface DayCard {
   user_id: string
   card_date: string
   photo_url: string | null
+  thumb_url: string | null // Thumbnail for calendar views
   caption: string | null
   sticker_state: StickerState[]
   updated_at: string

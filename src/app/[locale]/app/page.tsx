@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, use } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSupabase, resetSupabaseClient } from '@/lib/supabase/client'
 import { Loader2, Bug } from 'lucide-react'
@@ -22,8 +22,10 @@ export default function AppPage({ params }: Props) {
   const locale: Locale = isValidLocale(localeParam) ? localeParam : i18n.defaultLocale
   const dict = getDictionarySync(locale)
 
+  // Trust middleware for initial auth - don't do redundant getUser() on mount
+  // Middleware already redirects unauthenticated users to /login
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [initializing, setInitializing] = useState(true)
   const [activeView, setActiveView] = useState<ViewType>('day') // Day is the main/default view
   const [selectedDate, setSelectedDate] = useState(formatDateString(new Date()))
   const [drawerOpen, setDrawerOpen] = useState(false)
@@ -32,35 +34,18 @@ export default function AppPage({ params }: Props) {
   const supabase = useSupabase()
   const isDev = process.env.NODE_ENV === 'development'
 
-  const checkUser = useCallback(async () => {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser()
-
-      if (error) {
-        console.error('[App] Auth error:', error)
-        router.replace(`/${locale}/login`)
-        return
-      }
-
-      if (!user) {
-        console.log('[App] No user, redirecting to login')
-        router.replace(`/${locale}/login`)
-        return
-      }
-
-      console.log('[App] User authenticated:', user.email)
-      setUser(user)
-    } catch (err) {
-      console.error('[App] Unexpected error:', err)
-      router.replace(`/${locale}/login`)
-    } finally {
-      setLoading(false)
-    }
-  }, [supabase, router, locale])
-
   useEffect(() => {
-    checkUser()
+    // Get initial session from existing cookies (no network call if session exists)
+    // This is much faster than getUser() which always makes a network call
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
+      if (session?.user) {
+        setUser(session.user)
+      }
+      // If no session, middleware should have redirected, but handle edge case
+      setInitializing(false)
+    })
 
+    // Subscribe to auth state changes for real-time updates
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event: AuthChangeEvent, session: Session | null) => {
         console.log('[App] Auth state changed:', event)
@@ -77,7 +62,7 @@ export default function AppPage({ params }: Props) {
     )
 
     return () => subscription.unsubscribe()
-  }, [checkUser, supabase, router, locale])
+  }, [supabase, router, locale])
 
   const handleSelectDate = (date: string) => {
     setSelectedDate(date)
@@ -94,7 +79,8 @@ export default function AppPage({ params }: Props) {
     router.replace(`/${locale}/login`)
   }
 
-  if (loading) {
+  // Show brief loading only during initialization
+  if (initializing) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex items-center justify-center">
         <div className="text-center">
@@ -103,10 +89,6 @@ export default function AppPage({ params }: Props) {
         </div>
       </div>
     )
-  }
-
-  if (!user) {
-    return null // Will redirect to login
   }
 
   return (
@@ -136,7 +118,7 @@ export default function AppPage({ params }: Props) {
         onLogout={handleLogout}
       />
 
-      {/* Main Content - matches reference: pt-[140px] pb-24 px-5 */}
+      {/* Main Content - Day view loads first, others lazy load on tab switch */}
       <main className="pt-[140px] pb-24 px-5">
         {activeView === 'day' && (
           <DayView

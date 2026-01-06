@@ -12,6 +12,7 @@ function toDayCard(row: any): DayCard {
     user_id: row.user_id,
     card_date: row.card_date,
     photo_url: row.photo_url,
+    thumb_url: row.thumb_url || null, // Thumbnail for calendar views
     caption: row.caption,
     sticker_state: (row.sticker_state as StickerState[]) || [],
     updated_at: row.updated_at,
@@ -67,6 +68,7 @@ export function useDayCard(date: string) {
         user_id: user.id,
         card_date: date,
         photo_url: updates.photo_url ?? null,
+        thumb_url: null, // Will be generated server-side
         caption: updates.caption ?? null,
         sticker_state: updates.sticker_state ?? [],
         updated_at: new Date().toISOString(),
