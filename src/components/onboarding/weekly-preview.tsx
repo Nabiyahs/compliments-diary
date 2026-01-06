@@ -1,24 +1,24 @@
 'use client'
 
-// Weekly view preview component - matches reference/weekly.html
+// Weekly view preview component - matches reference/weekly.html (amber/orange theme)
 export function WeeklyPreview() {
   return (
-    <div className="w-full max-w-[320px] mx-auto bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-2xl overflow-hidden shadow-xl border border-white/50">
+    <div className="w-full max-w-[320px] mx-auto bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-2xl overflow-hidden shadow-xl border border-white/50">
       {/* Mini Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-pink-100 px-3 py-2">
+      <div className="bg-white/80 backdrop-blur-lg border-b border-amber-100 px-3 py-2">
         <div className="flex items-center justify-between">
-          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-pink-50">
-            <div className="w-3 h-0.5 bg-pink-600 rounded-full" />
+          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50">
+            <div className="w-3 h-0.5 bg-[#F27430] rounded-full" />
           </div>
           <span className="text-xs font-bold text-gray-800">Praise Journal</span>
-          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-pink-50">
-            <span className="text-pink-600 text-sm">+</span>
+          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50">
+            <span className="text-[#F27430] text-sm">+</span>
           </div>
         </div>
         {/* Mini Tabs */}
         <div className="flex items-center justify-center gap-1 mt-2 pb-1">
           <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-white/60 text-gray-600">Day</span>
-          <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-pink-500 text-white">Week</span>
+          <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-[#F2B949] text-white">Week</span>
           <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-white/60 text-gray-600">Month</span>
         </div>
       </div>
@@ -40,8 +40,8 @@ export function WeeklyPreview() {
           {/* Monday */}
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="flex items-stretch">
-              <div className="w-12 bg-gradient-to-br from-pink-100 to-purple-100 flex flex-col items-center justify-center p-1 border-r border-pink-200">
-                <p className="text-[8px] font-bold text-pink-600">MON</p>
+              <div className="w-12 bg-gradient-to-br from-[#F2B949] to-[#EDD377] flex flex-col items-center justify-center p-1 border-r border-[#F2B949]">
+                <p className="text-[8px] font-bold text-[#F27430]">MON</p>
                 <p className="text-sm font-bold text-gray-800">13</p>
               </div>
               <div className="flex-1 p-2 flex gap-2">
@@ -61,12 +61,12 @@ export function WeeklyPreview() {
           </div>
 
           {/* Today - Wednesday */}
-          <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-lg shadow-sm overflow-hidden border border-pink-300">
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg shadow-sm overflow-hidden border border-[#F2B949]">
             <div className="flex items-stretch">
-              <div className="w-12 bg-gradient-to-br from-pink-200 to-pink-300 flex flex-col items-center justify-center p-1 border-r border-pink-400">
-                <p className="text-[8px] font-bold text-pink-700">WED</p>
-                <p className="text-sm font-bold text-pink-700">15</p>
-                <div className="w-1 h-1 bg-pink-600 rounded-full mt-0.5" />
+              <div className="w-12 bg-gradient-to-br from-[#F2B949] to-[#F27430] flex flex-col items-center justify-center p-1 border-r border-[#F27430]">
+                <p className="text-[8px] font-bold text-white">WED</p>
+                <p className="text-sm font-bold text-white">15</p>
+                <div className="w-1 h-1 bg-white rounded-full mt-0.5" />
               </div>
               <div className="flex-1 p-2 bg-white/60 flex gap-2">
                 <div className="w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 relative">
@@ -76,7 +76,7 @@ export function WeeklyPreview() {
                     alt="Coffee"
                     className="w-full h-full object-cover"
                   />
-                  <span className="absolute top-0.5 left-0.5 bg-pink-600 text-white text-[6px] font-bold px-1 rounded-full">Today</span>
+                  <span className="absolute top-0.5 left-0.5 bg-[#F27430] text-white text-[6px] font-bold px-1 rounded-full">Today</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[9px] text-gray-700 line-clamp-2">Morning coffee ☕✨</p>

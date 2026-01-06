@@ -25,7 +25,7 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
               key={item.id}
               className={cn(
                 'flex flex-col items-center gap-1 transition-colors',
-                item.active ? 'text-pink-600' : 'text-gray-400'
+                item.active ? 'text-[#F27430]' : 'text-gray-400'
               )}
             >
               <Icon className="w-5 h-5" />
@@ -39,7 +39,7 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
         {/* Center FAB */}
         <button
           onClick={onAddClick}
-          className="w-14 h-14 -mt-8 bg-gradient-to-br from-pink-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
+          className="w-14 h-14 -mt-8 bg-gradient-to-br from-[#F2B949] to-[#F27430] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow"
         >
           <Plus className="w-6 h-6 text-white" />
         </button>
@@ -51,7 +51,7 @@ export function BottomNav({ onAddClick }: BottomNavProps) {
               key={item.id}
               className={cn(
                 'flex flex-col items-center gap-1 transition-colors',
-                item.active ? 'text-pink-600' : 'text-gray-400'
+                item.active ? 'text-[#F27430]' : 'text-gray-400'
               )}
             >
               <Icon className="w-5 h-5" />

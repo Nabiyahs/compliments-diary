@@ -85,9 +85,9 @@ export default function AppPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-[#F2B949] mx-auto mb-4" />
           <p className="text-gray-500 text-sm">Loading...</p>
         </div>
       </div>
@@ -99,9 +99,9 @@ export default function AppPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
       {/* Fixed Header with View Tabs - matches reference HTML structure */}
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-pink-100 z-50">
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-amber-100 z-50">
         <Header
           onMenuClick={() => setDrawerOpen(true)}
           onAddClick={() => {

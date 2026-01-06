@@ -1,25 +1,25 @@
 'use client'
 
-// Monthly view preview component - matches reference/monthly.html
+// Monthly view preview component - matches reference/monthly.html (amber/orange theme)
 export function MonthlyPreview() {
   return (
-    <div className="w-full max-w-[320px] mx-auto bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-2xl overflow-hidden shadow-xl border border-white/50">
+    <div className="w-full max-w-[320px] mx-auto bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-2xl overflow-hidden shadow-xl border border-white/50">
       {/* Mini Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-pink-100 px-3 py-2">
+      <div className="bg-white/80 backdrop-blur-lg border-b border-amber-100 px-3 py-2">
         <div className="flex items-center justify-between">
-          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-pink-50">
-            <div className="w-3 h-0.5 bg-pink-600 rounded-full" />
+          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50">
+            <div className="w-3 h-0.5 bg-[#F27430] rounded-full" />
           </div>
           <span className="text-xs font-bold text-gray-800">Praise Journal</span>
-          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-pink-50">
-            <span className="text-pink-600 text-sm">+</span>
+          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50">
+            <span className="text-[#F27430] text-sm">+</span>
           </div>
         </div>
         {/* Mini Tabs */}
         <div className="flex items-center justify-center gap-1 mt-2 pb-1">
           <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-white/60 text-gray-600">Day</span>
           <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-white/60 text-gray-600">Week</span>
-          <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-pink-500 text-white">Month</span>
+          <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-[#F2B949] text-white">Month</span>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ export function MonthlyPreview() {
                 <div
                   key={day}
                   className={`aspect-square rounded relative overflow-hidden ${
-                    isToday ? 'ring-1 ring-pink-400 ring-offset-1' : ''
+                    isToday ? 'ring-1 ring-[#F2B949] ring-offset-1' : ''
                   } ${hasImage ? '' : 'bg-gray-50'}`}
                 >
                   <span className={`absolute top-0.5 left-0.5 text-[6px] font-semibold z-10 ${
@@ -100,7 +100,7 @@ export function MonthlyPreview() {
         </div>
 
         {/* Stats Card */}
-        <div className="mt-2 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg p-2">
+        <div className="mt-2 bg-gradient-to-br from-[#F2B949] to-[#F27430] rounded-lg p-2">
           <p className="text-[8px] font-bold text-white mb-1">January Highlights</p>
           <div className="grid grid-cols-3 gap-1">
             <div className="text-center bg-white/20 backdrop-blur-sm rounded p-1">

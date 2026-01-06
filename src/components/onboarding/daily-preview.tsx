@@ -1,23 +1,23 @@
 'use client'
 
-// Daily view preview component - matches reference-daily.html
+// Daily view preview component - matches reference-daily.html (amber/orange theme)
 export function DailyPreview() {
   return (
-    <div className="w-full max-w-[320px] mx-auto bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 rounded-2xl overflow-hidden shadow-xl border border-white/50">
+    <div className="w-full max-w-[320px] mx-auto bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 rounded-2xl overflow-hidden shadow-xl border border-white/50">
       {/* Mini Header */}
-      <div className="bg-white/80 backdrop-blur-lg border-b border-pink-100 px-3 py-2">
+      <div className="bg-white/80 backdrop-blur-lg border-b border-amber-100 px-3 py-2">
         <div className="flex items-center justify-between">
-          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-pink-50">
-            <div className="w-3 h-0.5 bg-pink-600 rounded-full" />
+          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50">
+            <div className="w-3 h-0.5 bg-[#F27430] rounded-full" />
           </div>
           <span className="text-xs font-bold text-gray-800">Praise Journal</span>
-          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-pink-50">
-            <span className="text-pink-600 text-sm">+</span>
+          <div className="w-7 h-7 flex items-center justify-center rounded-lg bg-amber-50">
+            <span className="text-[#F27430] text-sm">+</span>
           </div>
         </div>
         {/* Mini Tabs */}
         <div className="flex items-center justify-center gap-1 mt-2 pb-1">
-          <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-pink-500 text-white">Day</span>
+          <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-[#F2B949] text-white">Day</span>
           <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-white/60 text-gray-600">Week</span>
           <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-white/60 text-gray-600">Month</span>
         </div>
@@ -54,7 +54,7 @@ export function DailyPreview() {
           </p>
           <div className="flex items-center justify-between text-[8px] text-gray-400">
             <span>3:42 PM</span>
-            <span className="text-pink-400">♡</span>
+            <span className="text-[#F27430]">♡</span>
           </div>
         </div>
       </div>

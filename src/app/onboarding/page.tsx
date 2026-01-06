@@ -71,7 +71,7 @@ export default function OnboardingPage() {
   const isFirstStep = currentStep === 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex flex-col overflow-hidden">
       {/* Skip button - only on first step */}
       {isFirstStep && (
         <div className="absolute top-4 right-4 z-10 safe-area-inset-top">
@@ -109,7 +109,7 @@ export default function OnboardingPage() {
       </div>
 
       {/* Bottom section - fixed to bottom */}
-      <div className="flex-shrink-0 p-6 pb-8 safe-area-inset-bottom bg-gradient-to-t from-pink-50 via-pink-50/80 to-transparent">
+      <div className="flex-shrink-0 p-6 pb-8 safe-area-inset-bottom bg-gradient-to-t from-amber-50 via-amber-50/80 to-transparent">
         {/* Progress dots */}
         <div className="flex justify-center gap-2 mb-6">
           {STEPS.map((_, index) => (
@@ -117,9 +117,9 @@ export default function OnboardingPage() {
               key={index}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentStep
-                  ? 'w-6 bg-pink-500'
+                  ? 'w-6 bg-[#F2B949]'
                   : index < currentStep
-                  ? 'w-2 bg-pink-300'
+                  ? 'w-2 bg-amber-300'
                   : 'w-2 bg-gray-300'
               }`}
             />
@@ -129,7 +129,7 @@ export default function OnboardingPage() {
         {/* Action button */}
         <button
           onClick={handleNext}
-          className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]"
+          className="w-full bg-gradient-to-r from-[#F2B949] to-[#F27430] hover:from-[#EDD377] hover:to-[#F2B949] text-white font-semibold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg active:scale-[0.98]"
         >
           {isLastStep ? (
             'Start Your Journey'

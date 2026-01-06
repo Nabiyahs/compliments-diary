@@ -170,9 +170,9 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                 className={cn(
                   'aspect-square rounded-lg p-0.5 relative overflow-hidden transition-all',
                   hasPhoto ? '' : 'bg-gray-50',
-                  isCurrentDay && hasPhoto && 'ring-2 ring-pink-500 ring-offset-2',
-                  isCurrentDay && !hasPhoto && 'ring-2 ring-pink-400',
-                  !isCurrentDay && 'hover:ring-1 hover:ring-pink-200'
+                  isCurrentDay && hasPhoto && 'ring-2 ring-[#F2B949] ring-offset-2',
+                  isCurrentDay && !hasPhoto && 'ring-2 ring-[#F2B949]',
+                  !isCurrentDay && 'hover:ring-1 hover:ring-amber-200'
                 )}
               >
                 {/* Date number */}
@@ -217,7 +217,7 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
       </div>
 
       {/* Month Stats - matches reference: gradient bg with stats */}
-      <div className="bg-gradient-to-br from-pink-500 to-purple-600 rounded-2xl p-6 shadow-xl mb-6">
+      <div className="bg-gradient-to-br from-[#F2B949] to-[#F27430] rounded-2xl p-6 shadow-xl mb-6">
         <h3 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
           <BarChart3 className="w-5 h-5" />
           {format(currentMonth, 'MMMM')} Highlights
@@ -254,8 +254,8 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                   onClick={() => onSelectDate(moment.date)}
                   className={cn(
                     'w-full flex gap-3 items-center p-3 rounded-xl transition-colors',
-                    index === 0 && 'bg-gradient-to-r from-pink-50 to-purple-50',
-                    index === 1 && 'bg-gradient-to-r from-blue-50 to-cyan-50',
+                    index === 0 && 'bg-gradient-to-r from-amber-50 to-orange-50',
+                    index === 1 && 'bg-gradient-to-r from-yellow-50 to-amber-50',
                     index === 2 && 'bg-gradient-to-r from-orange-50 to-yellow-50'
                   )}
                 >
@@ -274,7 +274,7 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                       {moment.caption}
                     </p>
                   </div>
-                  <Heart className="w-4 h-4 text-pink-500 flex-shrink-0" />
+                  <Heart className="w-4 h-4 text-[#F27430] flex-shrink-0" />
                 </button>
               )
             })}

@@ -14,16 +14,16 @@ export function Header({ onMenuClick, onAddClick }: HeaderProps) {
     <div className="flex items-center justify-between px-5 py-4">
       <button
         onClick={onMenuClick}
-        className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-pink-50 transition-colors"
+        className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-amber-50 transition-colors"
       >
-        <Menu className="w-5 h-5 text-pink-600" />
+        <Menu className="w-5 h-5 text-[#F27430]" />
       </button>
       <h1 className="text-lg font-bold text-gray-800">Praise Journal</h1>
       <button
         onClick={onAddClick}
-        className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-pink-50 transition-colors"
+        className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-amber-50 transition-colors"
       >
-        <Plus className="w-5 h-5 text-pink-600" />
+        <Plus className="w-5 h-5 text-[#F27430]" />
       </button>
     </div>
   )

@@ -25,7 +25,7 @@ export function ViewTabs({ activeView, onViewChange }: ViewTabsProps) {
           className={cn(
             'px-6 py-2 rounded-full text-sm font-semibold transition-all',
             activeView === tab.id
-              ? 'bg-pink-500 text-white'
+              ? 'bg-[#F2B949] text-white'
               : 'bg-white/60 text-gray-600 hover:bg-white/80'
           )}
         >

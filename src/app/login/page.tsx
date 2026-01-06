@@ -173,7 +173,7 @@ function LoginForm() {
   const isDev = process.env.NODE_ENV === 'development'
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
@@ -217,7 +217,7 @@ function LoginForm() {
             <div className="mb-6">
               <button
                 onClick={() => { setMode('login'); resetForm(); }}
-                className="text-sm text-pink-500 hover:text-pink-600 mb-4"
+                className="text-sm text-[#F27430] hover:text-[#F2B949] mb-4"
               >
                 ← Back to login
               </button>
@@ -261,7 +261,7 @@ function LoginForm() {
                     required
                     disabled={loading}
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                   />
                 </div>
               </div>
@@ -280,7 +280,7 @@ function LoginForm() {
                     required
                     disabled={loading}
                     autoComplete="current-password"
-                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                   />
                   <button
                     type="button"
@@ -296,7 +296,7 @@ function LoginForm() {
                 <button
                   type="button"
                   onClick={() => { setMode('forgot'); resetForm(); }}
-                  className="text-sm text-pink-500 hover:text-pink-600"
+                  className="text-sm text-[#F27430] hover:text-[#F2B949]"
                 >
                   Forgot password?
                 </button>
@@ -305,7 +305,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading || !email || !password}
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-[#F2B949] to-[#F27430] hover:from-[#EDD377] hover:to-[#F2B949] disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -336,7 +336,7 @@ function LoginForm() {
                     required
                     disabled={loading}
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                   />
                 </div>
               </div>
@@ -355,7 +355,7 @@ function LoginForm() {
                     required
                     disabled={loading}
                     autoComplete="new-password"
-                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                   />
                   <button
                     type="button"
@@ -382,7 +382,7 @@ function LoginForm() {
                     required
                     disabled={loading}
                     autoComplete="new-password"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                   />
                 </div>
               </div>
@@ -390,7 +390,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading || !email || !password || !confirmPassword}
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-[#F2B949] to-[#F27430] hover:from-[#EDD377] hover:to-[#F2B949] disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -425,7 +425,7 @@ function LoginForm() {
                     required
                     disabled={loading}
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
                   />
                 </div>
               </div>
@@ -433,7 +433,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading || !email}
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-[#F2B949] to-[#F27430] hover:from-[#EDD377] hover:to-[#F2B949] disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -492,11 +492,11 @@ function LoginForm() {
 
 function LoginFallback() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center">
-            <Loader2 className="w-8 h-8 animate-spin text-pink-500 mx-auto mb-4" />
+            <Loader2 className="w-8 h-8 animate-spin text-[#F27430] mx-auto mb-4" />
             <p className="text-gray-500">Loading...</p>
           </div>
         </div>

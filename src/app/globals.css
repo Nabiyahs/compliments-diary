@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdf2f8;
+  --background: #fffbeb;
   --foreground: #1f2937;
-  --primary: #FF6B9D;
-  --secondary: #FFC7D8;
-  --accent: #FFE5ED;
+  --primary: #F2B949;
+  --secondary: #EDD377;
+  --accent: #F2E829;
+  --warm: #F27430;
 }
 
 @theme inline {
@@ -14,6 +15,7 @@
   --color-primary: var(--primary);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
+  --color-warm: var(--warm);
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 

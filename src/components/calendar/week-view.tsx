@@ -13,15 +13,15 @@ interface WeekViewProps {
 
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 
-// Gradient pairs for each day
+// Gradient pairs for each day - amber/orange theme
 const DAY_GRADIENTS = [
-  { from: 'from-pink-100', to: 'to-purple-100', border: 'border-pink-200', text: 'text-pink-600' },
-  { from: 'from-purple-100', to: 'to-blue-100', border: 'border-purple-200', text: 'text-purple-600' },
-  { from: 'from-blue-100', to: 'to-cyan-100', border: 'border-blue-200', text: 'text-blue-600' },
-  { from: 'from-cyan-100', to: 'to-teal-100', border: 'border-cyan-200', text: 'text-cyan-600' },
-  { from: 'from-teal-100', to: 'to-green-100', border: 'border-teal-200', text: 'text-teal-600' },
-  { from: 'from-orange-100', to: 'to-yellow-100', border: 'border-orange-200', text: 'text-orange-600' },
-  { from: 'from-rose-100', to: 'to-pink-100', border: 'border-rose-200', text: 'text-rose-600' },
+  { from: 'from-[#F2B949]', to: 'to-[#EDD377]', border: 'border-[#F2B949]', text: 'text-[#F27430]' },
+  { from: 'from-[#EDD377]', to: 'to-[#F2E829]', border: 'border-[#EDD377]', text: 'text-[#F27430]' },
+  { from: 'from-amber-100', to: 'to-yellow-100', border: 'border-amber-200', text: 'text-amber-600' },
+  { from: 'from-yellow-100', to: 'to-orange-100', border: 'border-yellow-200', text: 'text-yellow-600' },
+  { from: 'from-orange-100', to: 'to-amber-100', border: 'border-orange-200', text: 'text-orange-600' },
+  { from: 'from-amber-200', to: 'to-yellow-200', border: 'border-amber-300', text: 'text-amber-700' },
+  { from: 'from-yellow-200', to: 'to-orange-200', border: 'border-yellow-300', text: 'text-yellow-700' },
 ]
 
 export function WeekView({ onSelectDate }: WeekViewProps) {
@@ -84,13 +84,13 @@ export function WeekView({ onSelectDate }: WeekViewProps) {
               <button
                 key={dateStr}
                 onClick={() => onSelectDate(dateStr)}
-                className="w-full bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl shadow-lg overflow-hidden border-2 border-pink-300"
+                className="w-full bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl shadow-lg overflow-hidden border-2 border-[#F2B949]"
               >
                 <div className="flex items-stretch">
-                  <div className="w-20 bg-gradient-to-br from-pink-200 to-pink-300 flex flex-col items-center justify-center p-3 border-r-2 border-pink-400">
-                    <p className="text-xs font-bold text-pink-700 mb-1">{WEEKDAYS[index]}</p>
-                    <p className="text-3xl font-bold text-pink-700">{date.getDate()}</p>
-                    <div className="mt-1 w-2 h-2 bg-pink-600 rounded-full" />
+                  <div className="w-20 bg-gradient-to-br from-[#F2B949] to-[#F27430] flex flex-col items-center justify-center p-3 border-r-2 border-[#F27430]">
+                    <p className="text-xs font-bold text-white mb-1">{WEEKDAYS[index]}</p>
+                    <p className="text-3xl font-bold text-white">{date.getDate()}</p>
+                    <div className="mt-1 w-2 h-2 bg-white rounded-full" />
                   </div>
                   <div className="flex-1 p-4 bg-white/60">
                     <div className="h-[160px] rounded-xl overflow-hidden mb-3 relative">
@@ -109,7 +109,7 @@ export function WeekView({ onSelectDate }: WeekViewProps) {
                               ))}
                             </div>
                           )}
-                          <div className="absolute top-2 left-2 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                          <div className="absolute top-2 left-2 bg-[#F27430] text-white text-xs font-bold px-2 py-1 rounded-full">
                             Today
                           </div>
                         </>
@@ -123,15 +123,15 @@ export function WeekView({ onSelectDate }: WeekViewProps) {
                       {dayData?.caption || 'Add today\'s reflection...'}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-pink-600 font-semibold">
+                      <span className="text-xs text-[#F27430] font-semibold">
                         {dayData?.time || 'Just now'}
                       </span>
                       <div className="flex gap-2">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-pink-100 hover:bg-pink-200 transition-colors">
-                          <Heart className="w-4 h-4 text-pink-600" />
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-amber-100 hover:bg-amber-200 transition-colors">
+                          <Heart className="w-4 h-4 text-[#F27430]" />
                         </div>
-                        <div className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-pink-50 transition-colors">
-                          <Share2 className="w-4 h-4 text-pink-400" />
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-amber-50 transition-colors">
+                          <Share2 className="w-4 h-4 text-[#F27430]" />
                         </div>
                       </div>
                     </div>
@@ -149,7 +149,7 @@ export function WeekView({ onSelectDate }: WeekViewProps) {
                 onClick={() => onSelectDate(dateStr)}
                 className={cn(
                   'w-full bg-white rounded-2xl shadow-lg overflow-hidden',
-                  isCurrentDay && 'ring-2 ring-pink-400'
+                  isCurrentDay && 'ring-2 ring-[#F2B949]'
                 )}
               >
                 <div className="flex items-stretch">
@@ -192,10 +192,10 @@ export function WeekView({ onSelectDate }: WeekViewProps) {
                         {dayData?.time || ''}
                       </span>
                       <div className="flex gap-2">
-                        <div className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-pink-50 transition-colors">
-                          <Heart className="w-4 h-4 text-pink-400" />
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-amber-50 transition-colors">
+                          <Heart className="w-4 h-4 text-[#F27430]" />
                         </div>
-                        <div className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-pink-50 transition-colors">
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-amber-50 transition-colors">
                           <Share2 className="w-4 h-4 text-gray-400" />
                         </div>
                       </div>
@@ -213,7 +213,7 @@ export function WeekView({ onSelectDate }: WeekViewProps) {
               onClick={() => onSelectDate(dateStr)}
               className={cn(
                 'w-full bg-white/60 rounded-2xl p-4 border-2 border-dashed border-gray-300',
-                isCurrentDay && 'ring-2 ring-pink-400'
+                isCurrentDay && 'ring-2 ring-[#F2B949]'
               )}
             >
               <div className="flex items-center gap-3 mb-3">
