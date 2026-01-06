@@ -7,7 +7,7 @@ import { getMonthRange } from '@/lib/utils'
 export interface MonthDayData {
   date: string
   praiseCount: number
-  photoUrl: string | null
+  thumbUrl: string | null // Only load thumbnail for calendar grid (not original)
   hasStamp: boolean
   caption: string | null
   stickers: string[]
@@ -25,6 +25,7 @@ export function useMonthData(year: number, month: number) {
       const { start, end } = getMonthRange(year, month)
 
       // Fetch all data in parallel
+      // IMPORTANT: Only fetch thumb_url for calendar view (not photo_url - saves bandwidth)
       const [praisesRes, dayCardsRes, dayStampsRes] = await Promise.all([
         supabase
           .from('praises')
@@ -33,7 +34,7 @@ export function useMonthData(year: number, month: number) {
           .lte('praise_date', end),
         supabase
           .from('day_cards')
-          .select('card_date, photo_url, caption, sticker_state')
+          .select('card_date, thumb_url, caption, sticker_state')
           .gte('card_date', start)
           .lte('card_date', end),
         supabase
@@ -54,8 +55,8 @@ export function useMonthData(year: number, month: number) {
         praiseCounts.set(p.praise_date, count + 1)
       })
 
-      // Create day card data map
-      const dayCardData = new Map<string, { photoUrl: string | null; caption: string | null; stickers: string[] }>()
+      // Create day card data map (using thumb_url only for calendar grid)
+      const dayCardData = new Map<string, { thumbUrl: string | null; caption: string | null; stickers: string[] }>()
       dayCardsRes.data?.forEach((c) => {
         // Extract emoji stickers from sticker_state
         const stickers: string[] = []
@@ -65,7 +66,7 @@ export function useMonthData(year: number, month: number) {
           })
         }
         dayCardData.set(c.card_date, {
-          photoUrl: c.photo_url,
+          thumbUrl: c.thumb_url,
           caption: c.caption,
           stickers,
         })
@@ -89,7 +90,7 @@ export function useMonthData(year: number, month: number) {
         monthData.set(date, {
           date,
           praiseCount: praiseCounts.get(date) || 0,
-          photoUrl: cardData?.photoUrl || null,
+          thumbUrl: cardData?.thumbUrl || null,
           hasStamp: stampDates.has(date),
           caption: cardData?.caption || null,
           stickers: cardData?.stickers || [],

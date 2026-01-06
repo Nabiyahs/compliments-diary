@@ -7,7 +7,7 @@ import { getWeekRange } from '@/lib/utils'
 export interface WeekDayData {
   date: string
   praiseCount: number
-  photoUrl: string | null
+  thumbUrl: string | null // Only load thumbnail for week view (not original)
   hasStamp: boolean
   caption: string | null
   stickers: string[]
@@ -26,6 +26,7 @@ export function useWeekData(anchorDate: Date) {
       const { start, end } = getWeekRange(anchorDate)
 
       // Fetch all data in parallel
+      // IMPORTANT: Only fetch thumb_url for week view (not photo_url - saves bandwidth)
       const [praisesRes, dayCardsRes, dayStampsRes] = await Promise.all([
         supabase
           .from('praises')
@@ -34,7 +35,7 @@ export function useWeekData(anchorDate: Date) {
           .lte('praise_date', end),
         supabase
           .from('day_cards')
-          .select('card_date, photo_url, caption, sticker_state, updated_at')
+          .select('card_date, thumb_url, caption, sticker_state, updated_at')
           .gte('card_date', start)
           .lte('card_date', end),
         supabase
@@ -59,8 +60,8 @@ export function useWeekData(anchorDate: Date) {
         praiseTimes.set(p.praise_date, time)
       })
 
-      // Create day card data map
-      const dayCardData = new Map<string, { photoUrl: string | null; caption: string | null; stickers: string[]; time: string | null }>()
+      // Create day card data map (using thumb_url only for week view)
+      const dayCardData = new Map<string, { thumbUrl: string | null; caption: string | null; stickers: string[]; time: string | null }>()
       dayCardsRes.data?.forEach((c) => {
         // Extract emoji stickers from sticker_state
         const stickers: string[] = []
@@ -71,7 +72,7 @@ export function useWeekData(anchorDate: Date) {
         }
         const time = c.updated_at ? new Date(c.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null
         dayCardData.set(c.card_date, {
-          photoUrl: c.photo_url,
+          thumbUrl: c.thumb_url,
           caption: c.caption,
           stickers,
           time,
@@ -96,7 +97,7 @@ export function useWeekData(anchorDate: Date) {
         weekData.set(date, {
           date,
           praiseCount: praiseCounts.get(date) || 0,
-          photoUrl: cardData?.photoUrl || null,
+          thumbUrl: cardData?.thumbUrl || null,
           hasStamp: stampDates.has(date),
           caption: cardData?.caption || null,
           stickers: cardData?.stickers || [],

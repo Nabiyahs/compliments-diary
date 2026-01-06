@@ -85,7 +85,7 @@ export function WeekView({ locale, onSelectDate }: WeekViewProps) {
           const dateStr = formatDateString(date)
           const dayData = weekData.get(dateStr)
           const isCurrentDay = isToday(date)
-          const hasEntry = dayData && (dayData.photoUrl || dayData.praiseCount > 0)
+          const hasEntry = dayData && (dayData.thumbUrl || dayData.praiseCount > 0)
           const gradient = DAY_GRADIENTS[index]
 
           // Current day (today) - special highlighted styling
@@ -104,10 +104,10 @@ export function WeekView({ locale, onSelectDate }: WeekViewProps) {
                   </div>
                   <div className="flex-1 p-4 bg-white/60">
                     <div className="h-[160px] rounded-xl overflow-hidden mb-3 relative">
-                      {dayData?.photoUrl ? (
+                      {dayData?.thumbUrl ? (
                         <>
                           <img
-                            src={dayData.photoUrl}
+                            src={dayData.thumbUrl}
                             alt=""
                             className="w-full h-full object-cover"
                             loading="lazy"
@@ -172,10 +172,10 @@ export function WeekView({ locale, onSelectDate }: WeekViewProps) {
                   </div>
                   <div className="flex-1 p-4">
                     <div className="h-[160px] rounded-xl overflow-hidden mb-3 relative">
-                      {dayData?.photoUrl ? (
+                      {dayData?.thumbUrl ? (
                         <>
                           <img
-                            src={dayData.photoUrl}
+                            src={dayData.thumbUrl}
                             alt=""
                             className="w-full h-full object-cover"
                             loading="lazy"
