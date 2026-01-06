@@ -68,18 +68,20 @@ Or use the Supabase CLI:
 npx supabase db push
 ```
 
-### 5. Configure Email Auth
+### 5. Configure Email + Password Auth
 
-This app uses email magic link (OTP) authentication. Configure it in Supabase:
+This app uses email + password authentication. Configure it in Supabase:
 
 1. Go to **Authentication > Providers > Email** in your Supabase Dashboard
-2. Ensure Email provider is enabled
+2. Ensure Email provider is enabled with **Confirm email: ON**
 3. Go to **Authentication > URL Configuration**
 4. Set **Site URL** to your app URL (e.g., `http://localhost:3000` for dev)
 5. Add **Redirect URLs**:
    ```
    http://localhost:3000/auth/callback
+   http://localhost:3000/auth/reset
    https://your-vercel-domain.vercel.app/auth/callback
+   https://your-vercel-domain.vercel.app/auth/reset
    ```
 
 See `docs/EMAIL_AUTH_SETUP.md` for detailed configuration instructions.

@@ -2,19 +2,26 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useSearchParams } from 'next/navigation'
-import { Mail, Loader2, AlertCircle, CheckCircle, Bug } from 'lucide-react'
+import { useSearchParams, useRouter } from 'next/navigation'
+import { Mail, Lock, Loader2, AlertCircle, CheckCircle, Bug, Eye, EyeOff } from 'lucide-react'
+
+type AuthMode = 'login' | 'signup' | 'forgot'
 
 function LoginForm() {
+  const [mode, setMode] = useState<AuthMode>('login')
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const [showDebug, setShowDebug] = useState(false)
 
   const searchParams = useSearchParams()
+  const router = useRouter()
 
-  // Check for error params from auth callback
+  // Check for error/success params from auth callback
   useEffect(() => {
     const errorParam = searchParams.get('error')
     const errorDesc = searchParams.get('error_description')
@@ -22,62 +29,141 @@ function LoginForm() {
     if (errorParam) {
       let errorMessage = errorDesc || `Authentication error: ${errorParam}`
 
-      // Provide more helpful messages for common errors
       if (errorParam === 'access_denied') {
         errorMessage = 'Access was denied. Please try again.'
       } else if (errorParam === 'code_exchange_failed') {
-        errorMessage = 'Failed to complete sign in. The link may have expired. Please request a new one.'
+        errorMessage = 'Failed to complete sign in. The link may have expired.'
       } else if (errorParam === 'no_code') {
-        errorMessage = 'Invalid authentication link. Please request a new one.'
+        errorMessage = 'Invalid authentication link.'
       }
 
       setError(errorMessage)
     }
 
-    // Check for success message
     const successParam = searchParams.get('message')
     if (successParam) {
-      setMessage(successParam)
+      setMessage(decodeURIComponent(successParam))
     }
   }, [searchParams])
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setError(null)
+    setMessage(null)
+    setPassword('')
+    setConfirmPassword('')
+  }
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
     setMessage(null)
 
     const supabase = createClient()
-    const emailRedirectTo = `${window.location.origin}/auth/callback`
-
-    // Debug logging in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] Sending magic link:', {
-        email,
-        emailRedirectTo,
-        origin: window.location.origin,
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-      })
-    }
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
+        password,
+      })
+
+      if (error) {
+        // Provide user-friendly error messages
+        if (error.message.includes('Invalid login credentials')) {
+          throw new Error('Invalid email or password. Please check your credentials.')
+        }
+        if (error.message.includes('Email not confirmed')) {
+          throw new Error('Please confirm your email address before signing in. Check your inbox.')
+        }
+        throw error
+      }
+
+      // Success - redirect to app
+      router.push('/app')
+    } catch (err) {
+      console.error('[Auth] Login error:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setMessage(null)
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long')
+      setLoading(false)
+      return
+    }
+
+    const supabase = createClient()
+    const emailRedirectTo = `${window.location.origin}/auth/callback`
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
         options: {
           emailRedirectTo,
         },
       })
 
       if (error) {
-        console.error('[Auth] OTP error:', error)
+        // Provide user-friendly error messages
+        if (error.message.includes('User already registered')) {
+          throw new Error('An account with this email already exists. Please log in instead.')
+        }
+        if (error.message.includes('Password should be')) {
+          throw new Error('Password is too weak. Use at least 6 characters with a mix of letters and numbers.')
+        }
         throw error
       }
 
-      // Success - show check email message
-      setMessage('Check your email for the magic link to sign in!')
+      // Success - show confirmation message
+      setMessage('Check your email to confirm your account! You can close this page.')
+      setEmail('')
+      setPassword('')
+      setConfirmPassword('')
+    } catch (err) {
+      console.error('[Auth] Signup error:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setMessage(null)
+
+    const supabase = createClient()
+    const redirectTo = `${window.location.origin}/auth/reset`
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
+      })
+
+      if (error) throw error
+
+      setMessage('Check your email for a password reset link!')
       setEmail('')
     } catch (err) {
-      console.error('[Auth] Error:', err)
+      console.error('[Auth] Reset password error:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
@@ -91,7 +177,7 @@ function LoginForm() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">
               Praise Journal
             </h1>
@@ -99,6 +185,48 @@ function LoginForm() {
               Your daily praise journal with polaroid memories
             </p>
           </div>
+
+          {/* Tabs (only show for login/signup) */}
+          {mode !== 'forgot' && (
+            <div className="flex mb-6 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => { setMode('login'); resetForm(); }}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                  mode === 'login'
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Log in
+              </button>
+              <button
+                onClick={() => { setMode('signup'); resetForm(); }}
+                className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all ${
+                  mode === 'signup'
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Sign up
+              </button>
+            </div>
+          )}
+
+          {/* Forgot Password Header */}
+          {mode === 'forgot' && (
+            <div className="mb-6">
+              <button
+                onClick={() => { setMode('login'); resetForm(); }}
+                className="text-sm text-pink-500 hover:text-pink-600 mb-4"
+              >
+                ← Back to login
+              </button>
+              <h2 className="text-lg font-semibold text-gray-800">Reset Password</h2>
+              <p className="text-gray-500 text-sm mt-1">
+                Enter your email and we&apos;ll send you a reset link.
+              </p>
+            </div>
+          )}
 
           {/* Error Display */}
           {error && (
@@ -116,48 +244,208 @@ function LoginForm() {
             </div>
           )}
 
-          {/* Email Magic Link Form */}
-          <form onSubmit={handleEmailAuth} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  required
-                  disabled={loading}
-                  autoComplete="email"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
-                />
+          {/* Login Form */}
+          {mode === 'login' && (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    disabled={loading}
+                    autoComplete="email"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                </div>
               </div>
-            </div>
 
-            <button
-              type="submit"
-              disabled={loading || !email}
-              className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                'Send Magic Link'
-              )}
-            </button>
-          </form>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    disabled={loading}
+                    autoComplete="current-password"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
 
-          <p className="text-center text-gray-500 text-xs mt-6">
-            We&apos;ll send you a magic link to sign in instantly.
-            <br />
-            No password needed!
-          </p>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => { setMode('forgot'); resetForm(); }}
+                  className="text-sm text-pink-500 hover:text-pink-600"
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !email || !password}
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* Signup Form */}
+          {mode === 'signup' && (
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    disabled={loading}
+                    autoComplete="email"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="At least 6 characters"
+                    required
+                    disabled={loading}
+                    autoComplete="new-password"
+                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    required
+                    disabled={loading}
+                    autoComplete="new-password"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !email || !password || !confirmPassword}
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  'Create account'
+                )}
+              </button>
+
+              <p className="text-center text-gray-500 text-xs">
+                By signing up, you agree to our terms of service.
+              </p>
+            </form>
+          )}
+
+          {/* Forgot Password Form */}
+          {mode === 'forgot' && (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                    disabled={loading}
+                    autoComplete="email"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || !email}
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 disabled:opacity-50 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send reset link'
+                )}
+              </button>
+            </form>
+          )}
 
           {/* Debug Panel (Development only) */}
           {isDev && (
@@ -177,18 +465,20 @@ function LoginForm() {
                     {typeof window !== 'undefined' ? window.location.origin : 'N/A'}
                   </p>
                   <p>
-                    <span className="text-gray-500">Redirect:</span>{' '}
+                    <span className="text-gray-500">Callback:</span>{' '}
                     {typeof window !== 'undefined'
                       ? `${window.location.origin}/auth/callback`
                       : 'N/A'}
                   </p>
                   <p>
-                    <span className="text-gray-500">Supabase URL:</span>{' '}
-                    {process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET'}
+                    <span className="text-gray-500">Reset URL:</span>{' '}
+                    {typeof window !== 'undefined'
+                      ? `${window.location.origin}/auth/reset`
+                      : 'N/A'}
                   </p>
                   <p>
-                    <span className="text-gray-500">Anon Key:</span>{' '}
-                    {process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? '***SET***' : 'NOT SET'}
+                    <span className="text-gray-500">Supabase URL:</span>{' '}
+                    {process.env.NEXT_PUBLIC_SUPABASE_URL || 'NOT SET'}
                   </p>
                 </div>
               )}

@@ -6,11 +6,12 @@ export async function GET(request: Request) {
   const code = searchParams.get('code')
   const error = searchParams.get('error')
   const errorDescription = searchParams.get('error_description')
+  const type = searchParams.get('type') // signup, recovery, etc.
   const next = searchParams.get('next') ?? '/app'
 
-  // Handle OAuth errors
+  // Handle auth errors
   if (error) {
-    console.error('[Auth Callback] OAuth error:', error, errorDescription)
+    console.error('[Auth Callback] Auth error:', error, errorDescription)
     const errorUrl = new URL('/login', origin)
     errorUrl.searchParams.set('error', error)
     if (errorDescription) {
@@ -33,7 +34,22 @@ export async function GET(request: Request) {
         return NextResponse.redirect(errorUrl)
       }
 
-      // Success - redirect to the destination
+      // Handle different auth types
+      if (type === 'recovery') {
+        // Password recovery - redirect to reset page
+        console.log('[Auth Callback] Password recovery, redirecting to /auth/reset')
+        return NextResponse.redirect(`${origin}/auth/reset`)
+      }
+
+      if (type === 'signup') {
+        // Email confirmation after signup - redirect to login with success message
+        console.log('[Auth Callback] Email confirmed, redirecting to login')
+        const loginUrl = new URL('/login', origin)
+        loginUrl.searchParams.set('message', 'Email confirmed! You can now sign in.')
+        return NextResponse.redirect(loginUrl)
+      }
+
+      // Default: redirect to app
       console.log('[Auth Callback] Success, redirecting to:', next)
       return NextResponse.redirect(`${origin}${next}`)
     } catch (err) {

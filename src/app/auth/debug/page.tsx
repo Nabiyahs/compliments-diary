@@ -97,7 +97,7 @@ export default function AuthDebugPage() {
           <div className="space-y-2 text-sm font-mono">
             <div className="flex justify-between">
               <span className="text-gray-400">Auth Method:</span>
-              <span className="text-green-400">Email Magic Link (Cookie-based)</span>
+              <span className="text-green-400">Email + Password (Cookie-based)</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Supabase URL:</span>
