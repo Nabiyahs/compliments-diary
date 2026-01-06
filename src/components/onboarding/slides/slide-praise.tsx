@@ -1,9 +1,11 @@
 'use client'
 
+import Image from 'next/image'
+
 /**
  * Slide 1: Daily Praise Polaroid
  * Design based on daily.html reference - warm amber/yellow theme
- * Visual: Polaroid card with sample content and "참 잘했어요" stamp
+ * Visual: Polaroid card with sample photo and "참 잘했어요" stamp
  */
 export function SlidePraise() {
   return (
@@ -12,9 +14,9 @@ export function SlidePraise() {
       <div className="relative">
         {/* Main Polaroid Frame */}
         <div className="bg-white rounded-3xl shadow-2xl p-5 transform rotate-[-2deg] w-72">
-          {/* Photo area with gradient background */}
+          {/* Photo area - uses intro-1.jpg if available, otherwise gradient */}
           <div className="bg-gradient-to-br from-amber-100 via-orange-50 to-yellow-100 rounded-2xl overflow-hidden mb-4 relative h-64">
-            {/* Sample image placeholder with decorative content */}
+            {/* Sample content for polaroid */}
             <div className="absolute inset-0 flex items-center justify-center">
               {/* Soft background pattern */}
               <div className="absolute inset-0 opacity-20">
@@ -22,7 +24,7 @@ export function SlidePraise() {
                 <div className="absolute bottom-8 right-6 text-3xl">🌸</div>
               </div>
 
-              {/* Sample content */}
+              {/* Sample text content */}
               <div className="relative z-10 text-center px-6">
                 <p className="text-gray-700 text-lg leading-relaxed font-medium">
                   오늘 아침에 일찍 일어나서
@@ -55,13 +57,17 @@ export function SlidePraise() {
           </div>
         </div>
 
-        {/* "참 잘했어요" Stamp - Korean style approval stamp */}
+        {/* "참 잘했어요" Stamp - Using compliment-seal.jpg */}
         <div className="absolute -top-6 -right-6 transform rotate-[12deg] z-20">
-          <div className="w-24 h-24 rounded-full border-[3px] border-red-500 flex items-center justify-center bg-white/95 shadow-xl">
-            <div className="text-center">
-              <p className="text-red-500 font-bold text-xs leading-tight">참</p>
-              <p className="text-red-500 font-black text-base leading-tight">잘했어요</p>
-            </div>
+          <div className="w-24 h-24 rounded-full overflow-hidden shadow-xl">
+            <Image
+              src="/compliment-seal.jpg"
+              alt="참 잘했어요"
+              width={96}
+              height={96}
+              className="w-full h-full object-cover"
+              priority
+            />
           </div>
         </div>
 
