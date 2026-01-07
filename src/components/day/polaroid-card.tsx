@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
+import { startOfDay } from 'date-fns'
 import { AppIcon } from '@/components/ui/app-icon'
-import { cn } from '@/lib/utils'
+import { cn, parseDateString } from '@/lib/utils'
 import { uploadPhoto } from '@/lib/image-upload'
+import { StampOverlay } from './stamp-overlay'
 import type { DayCard, StickerState } from '@/types/database'
 
 const DEBUG = process.env.NODE_ENV === 'development'
@@ -36,6 +38,14 @@ export function PolaroidCard({
   onEditingChange,
 }: PolaroidCardProps) {
   const placeholder = PLACEHOLDER_TEXT
+
+  // Check if the selected date is in the future (no editing allowed)
+  const isFutureDate = useMemo(() => {
+    const selectedDate = startOfDay(parseDateString(date))
+    const today = startOfDay(new Date())
+    return selectedDate > today
+  }, [date])
+
   // Edit mode state
   const [isEditing, setIsEditing] = useState(false)
 
@@ -50,10 +60,14 @@ export function PolaroidCard({
 
   // UI state
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [playStampAnimation, setPlayStampAnimation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoAreaRef = useRef<HTMLDivElement>(null)
 
   const stickers = dayCard?.sticker_state || []
+
+  // Show stamp if entry has a photo (saved entry)
+  const showStamp = Boolean(dayCard?.photo_path)
 
   // Sync praise draft when dayCard changes (e.g., date navigation)
   useEffect(() => {
@@ -63,6 +77,7 @@ export function PolaroidCard({
     setPendingPhotoPath(null)
     setPendingPhotoPreview(null)
     setIsEditing(false)
+    setPlayStampAnimation(false)
     onEditingChange?.(false)
   }, [dayCard?.praise, dayCard?.entry_date, onEditingChange])
 
@@ -125,6 +140,9 @@ export function PolaroidCard({
   }
 
   const handleEditClick = () => {
+    // Block editing for future dates
+    if (isFutureDate) return
+
     if (!isEditing) {
       // Enter edit mode
       if (DEBUG) console.log('[PolaroidCard] Entering edit mode')
@@ -195,6 +213,9 @@ export function PolaroidCard({
       setPendingPhotoPreview(null)
       setIsEditing(false)
       onEditingChange?.(false)
+
+      // Trigger stamp animation after successful save
+      setPlayStampAnimation(true)
 
       // Handle refresh warning separately (not a save failure)
       if (result.refreshError) {
@@ -397,18 +418,20 @@ export function PolaroidCard({
           <div className="flex items-center justify-between text-xs text-gray-400">
             <span>{dayCard?.created_at ? new Date(dayCard.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
             <div className="flex gap-3">
-              {/* Edit (pencil) button */}
-              <button
-                onClick={handleEditClick}
-                className={cn(
-                  'transition-colors p-1',
-                  isEditing ? 'text-[#F27430]' : 'hover:text-[#F27430]'
-                )}
-                aria-label="Edit"
-                title="Edit"
-              >
-                <AppIcon name="edit" className="w-3.5 h-3.5" />
-              </button>
+              {/* Edit (pencil) button - hidden for future dates */}
+              {!isFutureDate && (
+                <button
+                  onClick={handleEditClick}
+                  className={cn(
+                    'transition-colors p-1',
+                    isEditing ? 'text-[#F27430]' : 'hover:text-[#F27430]'
+                  )}
+                  aria-label="Edit"
+                  title="Edit"
+                >
+                  <AppIcon name="edit" className="w-3.5 h-3.5" />
+                </button>
+              )}
 
               {/* Heart (like) button - only show if entry exists */}
               {dayCard?.id && onToggleLike && (
@@ -457,6 +480,13 @@ export function PolaroidCard({
             <AppIcon name="spinner" className="w-4 h-4 animate-spin text-pink-500" />
           </div>
         )}
+
+        {/* Stamp overlay - Day View only */}
+        <StampOverlay
+          show={showStamp}
+          playAnimation={playStampAnimation}
+          onAnimationComplete={() => setPlayStampAnimation(false)}
+        />
       </div>
 
       {/* Emoji picker popup */}
