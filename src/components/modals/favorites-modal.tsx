@@ -17,46 +17,6 @@ interface FavoritesModalProps {
   favorites?: FavoriteEntry[]
 }
 
-// Sample data matching main.html exactly
-const SAMPLE_FAVORITES: FavoriteEntry[] = [
-  {
-    id: '1',
-    date: 'Jan 4, 2025',
-    caption: 'Peaceful sunset at the beach 🌅',
-    photoUrl: '/image/06c4d59883-ce5ce94d6ad46c42ee8e.png',
-  },
-  {
-    id: '2',
-    date: 'Jan 6, 2025',
-    caption: 'Cozy reading time ☕📚',
-    photoUrl: '/image/5ec6adb291-19a4f27becd9bf81891a.png',
-  },
-  {
-    id: '3',
-    date: 'Jan 8, 2025',
-    caption: 'Fresh flowers brighten my day 🌸',
-    photoUrl: '/image/7d5f2711ea-308301cb34fc01259450.png',
-  },
-  {
-    id: '4',
-    date: 'Jan 10, 2025',
-    caption: 'Mountain adventure 🏔️',
-    photoUrl: '/image/bbd9a37480-db910cb1c5c32661b40c.png',
-  },
-  {
-    id: '5',
-    date: 'Jan 12, 2025',
-    caption: 'Homemade comfort food 🍲',
-    photoUrl: '/image/3fef0312cc-ac35f49b2c70e143e772.png',
-  },
-  {
-    id: '6',
-    date: 'Jan 13, 2025',
-    caption: 'Morning yoga session 🧘‍♀️',
-    photoUrl: '/image/ea32fb5053-f4123dab51535d78b2ac.png',
-  },
-]
-
 // Rotation patterns matching main.html
 const ROTATIONS = [
   'rotate-[-2deg]',
@@ -71,10 +31,9 @@ const ROTATIONS = [
 export function FavoritesModal({
   isOpen,
   onClose,
-  favorites,
+  favorites = [],
 }: FavoritesModalProps) {
-  // Use sample data if no favorites provided
-  const displayFavorites = favorites && favorites.length > 0 ? favorites : SAMPLE_FAVORITES
+  const hasFavorites = favorites.length > 0
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -120,36 +79,58 @@ export function FavoritesModal({
         </div>
 
         <div className="px-4">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <p className="text-sm text-gray-600">{displayFavorites.length} saved memories</p>
-            <AppIcon name="heart" className="w-5 h-5 text-orange-500" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {displayFavorites.map((entry, index) => (
-              <div
-                key={entry.id}
-                className={cn(
-                  'relative bg-white rounded-2xl shadow-md overflow-hidden hover:rotate-0 transition-transform duration-300 transform',
-                  ROTATIONS[index % ROTATIONS.length]
-                )}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={entry.photoUrl}
-                  alt={entry.caption}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-2 right-2">
-                  <AppIcon name="heart" className="w-5 h-5 text-red-500 drop-shadow-lg fill-current" />
-                </div>
-                <div className="p-3 bg-white">
-                  <p className="text-xs text-gray-500 mb-1">{entry.date}</p>
-                  <p className="text-sm text-gray-700 line-clamp-2">{entry.caption}</p>
-                </div>
+          {hasFavorites ? (
+            <>
+              <div className="flex items-center justify-between mb-4 px-2">
+                <p className="text-sm text-gray-600">{favorites.length} saved memories</p>
+                <AppIcon name="heart" className="w-5 h-5 text-orange-500" />
               </div>
-            ))}
-          </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {favorites.map((entry, index) => (
+                  <div
+                    key={entry.id}
+                    className={cn(
+                      'relative bg-white rounded-2xl shadow-md overflow-hidden hover:rotate-0 transition-transform duration-300 transform',
+                      ROTATIONS[index % ROTATIONS.length]
+                    )}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={entry.photoUrl}
+                      alt={entry.caption}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="absolute top-2 right-2">
+                      <AppIcon name="heart" className="w-5 h-5 text-red-500 drop-shadow-lg fill-current" />
+                    </div>
+                    <div className="p-3 bg-white">
+                      <p className="text-xs text-gray-500 mb-1">{entry.date}</p>
+                      <p className="text-sm text-gray-700 line-clamp-2">{entry.caption}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            /* Introduction/Empty State - shown when no favorites */
+            <div className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-6">
+                <AppIcon name="heart" className="w-10 h-10 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-3 text-center">
+                Your Cherished Moments
+              </h3>
+              <p className="text-gray-600 text-center text-sm leading-relaxed max-w-xs">
+                Tap the heart icon on any daily entry to save it here. Your favorite memories will be collected in this special place.
+              </p>
+              <div className="mt-8 flex gap-2">
+                <div className="w-16 h-16 bg-gray-100 rounded-xl transform rotate-[-3deg]" />
+                <div className="w-16 h-16 bg-gray-100 rounded-xl transform rotate-[2deg] mt-2" />
+                <div className="w-16 h-16 bg-gray-100 rounded-xl transform rotate-[-1deg]" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
