@@ -63,21 +63,16 @@ export function StreakModal({
           </button>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-8">
-          {/* Fire icon with streak number */}
-          <div className="relative mb-6">
-            <AppIcon name="flame" className="w-[120px] h-[120px] text-orange-500" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-4xl font-bold text-white drop-shadow-lg mt-4">
-                {currentStreak}
-              </span>
-            </div>
+        <div className="flex flex-col items-center justify-center py-6">
+          {/* Large flame icon - no overlay number */}
+          <div className="mb-4">
+            <AppIcon name="flame" className="w-16 h-16 text-orange-500" />
           </div>
 
           <h3 className="text-3xl font-bold text-gray-800 mb-2">{currentStreak} Days</h3>
-          <p className="text-gray-600 text-center mb-8">
+          <p className="text-gray-600 text-center mb-8 leading-relaxed max-w-[280px]" style={{ textWrap: 'balance', wordBreak: 'keep-all' }}>
             {currentStreak > 0
-              ? "You're on fire! Keep the momentum going."
+              ? <>You&apos;re on fire!<br />Keep the momentum going.</>
               : 'Start your streak today!'}
           </p>
 
