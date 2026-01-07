@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { AppIcon } from '@/components/ui/app-icon'
 import { cn } from '@/lib/utils'
 
+const SWIPE_HINT_STORAGE_KEY = 'daypat_guide_swipe_hint_shown'
+
 interface GuideModalProps {
   isOpen: boolean
   onClose: () => void
@@ -19,6 +21,9 @@ interface GuideModalProps {
 export function GuideModal({ isOpen, onClose }: GuideModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0)
   const totalSlides = 4
+
+  // Swipe hint state - show only once per localStorage
+  const [showSwipeHint, setShowSwipeHint] = useState(false)
 
   // Touch handling for swipe
   const touchStartX = useRef(0)
@@ -57,6 +62,51 @@ export function GuideModal({ isOpen, onClose }: GuideModalProps) {
     }
   }, [isOpen])
 
+  // Swipe hint - show once on first open (localStorage-based)
+  useEffect(() => {
+    if (!isOpen) return
+
+    // Check if user prefers reduced motion
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReducedMotion) return
+
+    // Check localStorage
+    try {
+      const hintShown = localStorage.getItem(SWIPE_HINT_STORAGE_KEY)
+      if (!hintShown) {
+        // Show hint after a brief delay for modal to settle
+        const showTimer = setTimeout(() => {
+          setShowSwipeHint(true)
+        }, 300)
+
+        // Hide hint after animation completes (~1.5s)
+        const hideTimer = setTimeout(() => {
+          setShowSwipeHint(false)
+          localStorage.setItem(SWIPE_HINT_STORAGE_KEY, 'true')
+        }, 1800)
+
+        return () => {
+          clearTimeout(showTimer)
+          clearTimeout(hideTimer)
+        }
+      }
+    } catch {
+      // localStorage not available
+    }
+  }, [isOpen])
+
+  // Hide swipe hint when user starts interacting
+  const dismissSwipeHint = useCallback(() => {
+    if (showSwipeHint) {
+      setShowSwipeHint(false)
+      try {
+        localStorage.setItem(SWIPE_HINT_STORAGE_KEY, 'true')
+      } catch {
+        // localStorage not available
+      }
+    }
+  }, [showSwipeHint])
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -74,7 +124,8 @@ export function GuideModal({ isOpen, onClose }: GuideModalProps) {
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.changedTouches[0].screenX
     setIsDragging(true)
-  }, [])
+    dismissSwipeHint() // Hide hint on first touch
+  }, [dismissSwipeHint])
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isDragging) return
@@ -134,6 +185,19 @@ export function GuideModal({ isOpen, onClose }: GuideModalProps) {
           </button>
         </div>
       </div>
+
+      {/* Swipe hint - subtle chevrons on edges (first time only) */}
+      {showSwipeHint && currentSlide === 0 && (
+        <>
+          {/* Right chevron hint - primary direction */}
+          <div
+            className="fixed right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none animate-swipe-hint-right"
+            aria-hidden="true"
+          >
+            <AppIcon name="chevron-right" className="w-6 h-6 text-gray-400/40" />
+          </div>
+        </>
+      )}
 
       {/* Main content - Fullscreen slides */}
       <div
