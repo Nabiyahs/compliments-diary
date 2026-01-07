@@ -7,13 +7,15 @@
 -- ============================================
 -- 1. ENTRIES TABLE (ONE per date per user)
 -- ============================================
+-- Note: photo_path and praise are NOT NULL - photos are required for entries
 CREATE TABLE IF NOT EXISTS entries (
     id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     entry_date DATE NOT NULL,
-    praise TEXT,
-    photo_path TEXT, -- Storage path in entry-photos bucket (e.g., "uid/2026-01-07/uuid.webp")
+    praise TEXT NOT NULL, -- Required: praise/caption text
+    photo_path TEXT NOT NULL, -- Required: Storage path in entry-photos bucket (e.g., "uid/2026-01-07/uuid.webp")
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE(user_id, entry_date)
 );
 

@@ -128,6 +128,14 @@ export function useDayCard(date: string) {
       return { success: false, error: 'Please log in to save.' }
     }
 
+    // REQUIRED: Photo must exist to save entry
+    // Check if we have a photo (either from updates or existing dayCard)
+    const effectivePhotoPath = updates.photo_url !== undefined ? updates.photo_url : dayCard?.photo_url
+    if (!effectivePhotoPath) {
+      console.error('[useDayCard] Save blocked - photo is required')
+      return { success: false, error: 'Please add a photo first.' }
+    }
+
     if (DEBUG) console.log('[useDayCard] Saving entry for user:', user.id, 'date:', date)
 
     setSaving(true)
@@ -139,28 +147,21 @@ export function useDayCard(date: string) {
 
     try {
       // Build the payload with correct column names for entries table
+      // Both photo_path and praise are required (NOT NULL in DB)
       const payload: {
         user_id: string
         entry_date: string
-        photo_path?: string | null
-        praise?: string | null
+        photo_path: string
+        praise: string
       } = {
         user_id: user.id,
         entry_date: date, // YYYY-MM-DD format
-      }
-
-      // Only include photo_path if it's being updated
-      if (updates.photo_url !== undefined) {
-        payload.photo_path = updates.photo_url
-      } else if (dayCard?.photo_url) {
-        payload.photo_path = dayCard.photo_url
-      }
-
-      // Only include praise if it's being updated
-      if (updates.caption !== undefined) {
-        payload.praise = updates.caption
-      } else if (dayCard?.caption) {
-        payload.praise = dayCard.caption
+        // photo_path is required - use new photo or existing (already validated above)
+        photo_path: (updates.photo_url !== undefined ? updates.photo_url : dayCard?.photo_url) as string,
+        // praise is required - default to empty string if not provided
+        praise: updates.caption !== undefined
+          ? (updates.caption || '')
+          : (dayCard?.caption || ''),
       }
 
       if (DEBUG) console.log('[useDayCard] Upserting to entries table:', payload)
@@ -216,6 +217,8 @@ export function useDayCard(date: string) {
           userFriendlyMessage = 'Entry already exists for this date.'
         } else if (msg.includes('relation') || msg.includes('does not exist')) {
           userFriendlyMessage = 'Database not configured. Contact support.'
+        } else if (msg.includes('not-null') || msg.includes('null value') || msg.includes('violates not-null')) {
+          userFriendlyMessage = 'Please add a photo first.'
         }
       }
 

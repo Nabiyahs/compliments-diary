@@ -72,17 +72,25 @@ export async function uploadPhoto(
 
   if (uploadError) {
     console.error('Upload error:', uploadError)
-    // Provide more specific error messages based on error type
-    if (uploadError.message?.includes('Bucket not found')) {
+    // Map all errors to user-friendly messages - never expose raw Supabase errors
+    const errMsg = (uploadError.message || '').toLowerCase()
+    if (errMsg.includes('bucket not found') || errMsg.includes('bucket')) {
       throw new Error('Storage not configured. Please contact support.')
     }
-    if (uploadError.message?.includes('not allowed') || uploadError.message?.includes('policy')) {
+    if (errMsg.includes('not allowed') || errMsg.includes('policy') || errMsg.includes('permission') || errMsg.includes('denied')) {
       throw new Error('Upload permission denied. Please try logging in again.')
     }
-    if (uploadError.message?.includes('exceeded') || uploadError.message?.includes('size')) {
+    if (errMsg.includes('exceeded') || errMsg.includes('size') || errMsg.includes('too large')) {
       throw new Error('Image is too large. Please use a smaller photo.')
     }
-    throw new Error(uploadError.message || 'Upload failed. Please try again.')
+    if (errMsg.includes('network') || errMsg.includes('fetch') || errMsg.includes('connection') || errMsg.includes('timeout')) {
+      throw new Error('Network error. Check your connection and try again.')
+    }
+    if (errMsg.includes('auth') || errMsg.includes('jwt') || errMsg.includes('expired') || errMsg.includes('token')) {
+      throw new Error('Session expired. Please log in again.')
+    }
+    // Default user-friendly message - never expose raw error
+    throw new Error('Upload failed. Please try again.')
   }
 
   // Return the path (not URL) for storing in DB
