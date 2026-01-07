@@ -50,11 +50,17 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Root path - redirect based on auth status
+  // Root path - onboarding page
+  // Logged-in users: redirect to /app
+  // Logged-out users: allow access to onboarding page
   if (pathname === '/') {
-    const url = request.nextUrl.clone()
-    url.pathname = user ? '/app' : '/login'
-    return NextResponse.redirect(url)
+    if (user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/app'
+      return NextResponse.redirect(url)
+    }
+    // Allow logged-out users to see onboarding
+    return response
   }
 
   // Protected routes - redirect to login if not authenticated
