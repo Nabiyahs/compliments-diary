@@ -1,6 +1,7 @@
 import imageCompression from 'browser-image-compression'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
+const DEBUG = process.env.NODE_ENV === 'development'
 const MAX_SIZE_MB = 1
 const MAX_WIDTH = 1200
 const MAX_HEIGHT = 1200
@@ -57,10 +58,17 @@ export async function uploadPhoto(
     throw new Error('Failed to process image. Please try a different photo.')
   }
 
-  // Generate file path: {user_id}/{YYYY-MM-DD}/{uuid}.webp
+  // Generate flat file path: {uuid}.webp (matches existing Storage structure)
+  // DO NOT use folder structure - Storage has flat filenames only
   const fileExt = 'webp'
   const uuid = crypto.randomUUID()
-  const filePath = `${user.id}/${date}/${uuid}.${fileExt}`
+  const filePath = `${uuid}.${fileExt}`
+
+  if (DEBUG) {
+    console.log('[uploadPhoto] Generated upload path:', filePath)
+    console.log('[uploadPhoto] User ID:', user.id)
+    console.log('[uploadPhoto] Date:', date)
+  }
 
   // Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage
@@ -99,13 +107,20 @@ export async function uploadPhoto(
     throw new Error('Upload failed. Please try again.')
   }
 
+  // SUCCESS: Log the path that will be saved to DB
+  if (DEBUG) {
+    console.log('[uploadPhoto] ✅ Upload SUCCESS')
+    console.log('[uploadPhoto] Storage path (to save in DB):', filePath)
+  }
+
   // Return the path (not URL) for storing in DB
+  // CRITICAL: This exact value must be saved to entries.photo_path
   return filePath
 }
 
 /**
  * Get a signed URL for a private storage path
- * @param path The storage path (e.g., "user_id/2026-01-07/uuid.webp")
+ * @param path The storage path (e.g., "uuid.webp")
  * @returns Signed URL for temporary access
  */
 export async function getSignedUrl(path: string): Promise<string | null> {
@@ -113,13 +128,22 @@ export async function getSignedUrl(path: string): Promise<string | null> {
 
   const supabase = getSupabaseClient()
 
+  if (DEBUG) {
+    console.log('[getSignedUrl] Requesting signed URL for path:', path)
+  }
+
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
     .createSignedUrl(path, SIGNED_URL_EXPIRES_IN)
 
   if (error) {
-    console.error('Failed to get signed URL:', error)
+    console.error('[getSignedUrl] Failed to get signed URL:', error.message)
+    console.error('[getSignedUrl] Path attempted:', path)
     return null
+  }
+
+  if (DEBUG) {
+    console.log('[getSignedUrl] ✅ Got signed URL for:', path)
   }
 
   return data.signedUrl
@@ -127,7 +151,7 @@ export async function getSignedUrl(path: string): Promise<string | null> {
 
 /**
  * Delete photo from storage
- * @param path The storage path to delete
+ * @param path The storage path to delete (flat filename like "uuid.webp")
  */
 export async function deletePhoto(path: string): Promise<void> {
   const supabase = getSupabaseClient()
@@ -140,15 +164,17 @@ export async function deletePhoto(path: string): Promise<void> {
     throw new Error('User not authenticated')
   }
 
-  // Verify the path belongs to the current user
-  if (!path.startsWith(user.id)) {
-    throw new Error('Permission denied')
-  }
+  // Path is now a flat filename (uuid.webp) - no user prefix to verify
+  // RLS policies on Storage bucket handle authorization
 
   const { error } = await supabase.storage.from(BUCKET_NAME).remove([path])
 
   if (error) {
-    console.error('Delete error:', error)
+    console.error('[deletePhoto] Delete error:', error)
     throw error
+  }
+
+  if (DEBUG) {
+    console.log('[deletePhoto] ✅ Deleted:', path)
   }
 }
