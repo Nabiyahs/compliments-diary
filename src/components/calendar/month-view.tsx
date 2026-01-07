@@ -21,7 +21,7 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
 
   const { data: monthData, loading } = useMonthData(year, month)
 
-  // Get calendar days starting from Monday
+  // Get calendar days starting from Monday (only include necessary weeks)
   const calendarDays = useMemo(() => {
     const firstDay = startOfMonth(new Date(year, month, 1))
     const days: Date[] = []
@@ -42,14 +42,17 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
       days.push(new Date(year, month, i))
     }
 
-    // Fill remaining days to complete the grid
-    const remaining = 42 - days.length
+    // Only fill to complete the last week (not always 6 weeks)
+    const remaining = (7 - (days.length % 7)) % 7
     for (let i = 1; i <= remaining; i++) {
       days.push(new Date(year, month + 1, i))
     }
 
     return days
   }, [year, month])
+
+  // Calculate number of weeks for grid height
+  const numWeeks = Math.ceil(calendarDays.length / 7)
 
   const goToPrevMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1))
@@ -102,8 +105,11 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
           ))}
         </div>
 
-        {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-1">
+        {/* Calendar Days - larger cells when fewer weeks */}
+        <div className={cn(
+          'grid grid-cols-7 gap-1.5',
+          numWeeks <= 5 ? 'auto-rows-[1fr]' : ''
+        )}>
           {calendarDays.map((date, index) => {
             const dateStr = formatDateString(date)
             const isCurrentMonth = isSameMonth(date, currentMonth)
@@ -111,17 +117,20 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
             const isCurrentDay = isToday(date)
             const hasPhoto = dayData?.thumbUrl && isCurrentMonth
 
+            // Cell height class based on number of weeks
+            const cellHeight = numWeeks <= 4 ? 'h-16' : numWeeks <= 5 ? 'h-14' : 'h-12'
+
             // Empty placeholder for non-month days at the beginning
             if (!isCurrentMonth && index < 7) {
               return (
-                <div key={index} className="aspect-square bg-gray-50 rounded-lg" />
+                <div key={index} className={cn('aspect-square bg-gray-50/50 rounded-lg', cellHeight)} />
               )
             }
 
             // Non-month days at the end (hidden)
             if (!isCurrentMonth) {
               return (
-                <div key={index} className="aspect-square bg-gray-50 rounded-lg" />
+                <div key={index} className={cn('aspect-square bg-gray-50/50 rounded-lg', cellHeight)} />
               )
             }
 
@@ -132,6 +141,7 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                 onClick={() => onSelectDate(dateStr)}
                 className={cn(
                   'aspect-square rounded-lg p-0.5 relative overflow-hidden transition-all',
+                  cellHeight,
                   hasPhoto ? '' : 'bg-gray-50',
                   isCurrentDay && 'border-2 border-orange-400',
                   !isCurrentDay && 'hover:ring-1 hover:ring-amber-200'
