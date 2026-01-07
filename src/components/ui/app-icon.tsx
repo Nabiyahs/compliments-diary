@@ -12,6 +12,7 @@ import {
   faGlobe,
   faCalendarDays,
   faChartLine,
+  faCompass,
   // Actions
   faPlus,
   faPen,
@@ -54,6 +55,7 @@ const iconMap: Record<string, IconDefinition> = {
   'globe': faGlobe,
   'calendar': faCalendarDays,
   'trending-up': faChartLine,
+  'compass': faCompass,
   // Actions
   'plus': faPlus,
   'edit': faPen,

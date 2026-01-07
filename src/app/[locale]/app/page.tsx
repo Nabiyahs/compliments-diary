@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { useSupabase, resetSupabaseClient } from '@/lib/supabase/client'
 import { AppIcon } from '@/components/ui/app-icon'
 import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js'
-import { Header, ViewTabs, SideDrawer, BottomNav, type ViewType } from '@/components/shell'
+import { Header, ViewTabs, BottomNav, type ViewType } from '@/components/shell'
+import { IntroModal, FavoritesModal, StreakModal, ProfileModal } from '@/components/modals'
 import { MonthView } from '@/components/calendar/month-view'
 import { WeekView } from '@/components/calendar/week-view'
 import { DayView } from '@/components/day/day-view'
@@ -17,7 +18,13 @@ export default function AppPage() {
   const [initializing, setInitializing] = useState(true)
   const [activeView, setActiveView] = useState<ViewType>('day')
   const [selectedDate, setSelectedDate] = useState(() => formatDateString(new Date()))
-  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  // Modal states (matches main.html modal structure)
+  const [introOpen, setIntroOpen] = useState(false)
+  const [favoritesOpen, setFavoritesOpen] = useState(false)
+  const [streakOpen, setStreakOpen] = useState(false)
+  const [profileOpen, setProfileOpen] = useState(false)
+
   const [showDebug, setShowDebug] = useState(false)
   const router = useRouter()
   const supabase = useSupabase()
@@ -57,6 +64,7 @@ export default function AppPage() {
   }
 
   const handleLogout = async () => {
+    setProfileOpen(false)
     await supabase.auth.signOut()
     resetSupabaseClient()
     clearSessionTracking()
@@ -76,18 +84,11 @@ export default function AppPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
-      {/* Fixed Header with View Tabs */}
+      {/* Fixed Header with View Tabs - matches main.html exactly */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-b border-amber-100 z-50">
-        <Header onMenuClick={() => setDrawerOpen(true)} />
+        <Header />
         <ViewTabs activeView={activeView} onViewChange={setActiveView} />
       </header>
-
-      {/* Side Drawer */}
-      <SideDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onLogout={handleLogout}
-      />
 
       {/* Main Content */}
       <main className="pt-[140px] pb-24 px-5">
@@ -105,12 +106,40 @@ export default function AppPage() {
         )}
       </main>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - opens modals, not pages */}
       <BottomNav
+        onIntroClick={() => setIntroOpen(true)}
+        onFavoritesClick={() => setFavoritesOpen(true)}
         onAddClick={() => {
           setSelectedDate(formatDateString(new Date()))
           setActiveView('day')
         }}
+        onStreakClick={() => setStreakOpen(true)}
+        onProfileClick={() => setProfileOpen(true)}
+      />
+
+      {/* Modals - match main.html modal structure */}
+      <IntroModal
+        isOpen={introOpen}
+        onClose={() => setIntroOpen(false)}
+      />
+      <FavoritesModal
+        isOpen={favoritesOpen}
+        onClose={() => setFavoritesOpen(false)}
+        favorites={[]}
+      />
+      <StreakModal
+        isOpen={streakOpen}
+        onClose={() => setStreakOpen(false)}
+        currentStreak={0}
+        longestStreak={0}
+        totalEntries={0}
+      />
+      <ProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        onLogout={handleLogout}
+        userEmail={user?.email}
       />
 
       {/* Debug Panel (Development only) */}
@@ -126,7 +155,7 @@ export default function AppPage() {
             <div className="absolute bottom-12 right-0 w-72 bg-white rounded-lg shadow-xl border border-gray-200 p-4 text-xs font-mono">
               <h4 className="font-bold text-gray-800 mb-2">Session Debug</h4>
               <div className="space-y-1 text-gray-600">
-                <p><span className="text-gray-400">Status:</span> {user ? '✅ Authenticated' : '❌ Not authenticated'}</p>
+                <p><span className="text-gray-400">Status:</span> {user ? 'Authenticated' : 'Not authenticated'}</p>
                 <p><span className="text-gray-400">Email:</span> {user?.email || 'N/A'}</p>
                 <p><span className="text-gray-400">User ID:</span> {user?.id?.slice(0, 8) || 'N/A'}...</p>
                 <p><span className="text-gray-400">Provider:</span> {user?.app_metadata?.provider || 'N/A'}</p>
