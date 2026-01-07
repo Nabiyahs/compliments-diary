@@ -38,37 +38,38 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
   }
 
   return (
-    <div className="pb-8">
-      {/* Date Navigation - matches reference: prev/next chevrons + centered date block */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
+    <div className="pb-6">
+      {/* Date Navigation - compact header */}
+      <div className="mb-3">
+        <div className="flex items-center justify-between">
           <button
             onClick={goToPrevDay}
-            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
           >
             <AppIcon name="chevron-left" className="w-5 h-5 text-gray-600" />
           </button>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800">
+            <h2 className="text-lg font-bold text-gray-800">
               {format(date, 'MMMM d')}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-xs text-gray-500">
               {format(date, 'EEEE, yyyy')}
             </p>
           </div>
 
           <button
             onClick={goToNextDay}
-            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
           >
             <AppIcon name="chevron-right" className="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
 
-      {/* Polaroid Card - matches reference design */}
-      <PolaroidCard
+      {/* Polaroid Card - constrained width with side margins */}
+      <div className="px-4">
+        <PolaroidCard
         dayCard={dayCard}
         photoSignedUrl={photoSignedUrl}
         date={dateStr}
@@ -80,7 +81,8 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
         saving={cardSaving}
         saveError={error}
         onEditingChange={setEditingState}
-      />
+        />
+      </div>
     </div>
   )
 }
