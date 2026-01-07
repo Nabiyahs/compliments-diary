@@ -254,6 +254,16 @@ export function useDayCard(date: string) {
       console.error('[useDayCard] ❌ STAGE 2 EXCEPTION')
       console.error('[useDayCard] Error type:', typeof err)
       console.error('[useDayCard] Error:', err)
+
+      // Extract Supabase/PostgreSQL error details
+      const pgError = err as { code?: string; message?: string; details?: string; hint?: string }
+      if (pgError.code) {
+        console.error('[useDayCard] PostgreSQL error code:', pgError.code)
+        console.error('[useDayCard] PostgreSQL message:', pgError.message)
+        console.error('[useDayCard] PostgreSQL details:', pgError.details)
+        console.error('[useDayCard] PostgreSQL hint:', pgError.hint)
+      }
+
       if (err instanceof Error) {
         console.error('[useDayCard] Error name:', err.name)
         console.error('[useDayCard] Error message:', err.message)
@@ -263,7 +273,22 @@ export function useDayCard(date: string) {
       // Provide specific error messages based on error type
       let userFriendlyMessage = 'Failed to save. Please try again.'
 
-      if (err instanceof Error) {
+      // Check PostgreSQL error code first
+      if (pgError.code === '42P10') {
+        // Missing UNIQUE constraint for ON CONFLICT
+        console.error('[useDayCard] ══════════════════════════════════════════════════════════════')
+        console.error('[useDayCard] ❌ CRITICAL: Missing UNIQUE constraint on entries(user_id, entry_date)')
+        console.error('[useDayCard] The upsert requires a UNIQUE constraint to work.')
+        console.error('[useDayCard] ')
+        console.error('[useDayCard] FIX: Run this SQL in Supabase SQL Editor:')
+        console.error('[useDayCard] ')
+        console.error('[useDayCard]   ALTER TABLE public.entries')
+        console.error('[useDayCard]   ADD CONSTRAINT entries_user_id_entry_date_key')
+        console.error('[useDayCard]   UNIQUE (user_id, entry_date);')
+        console.error('[useDayCard] ')
+        console.error('[useDayCard] ══════════════════════════════════════════════════════════════')
+        userFriendlyMessage = 'Database configuration error. See console for fix.'
+      } else if (err instanceof Error) {
         const msg = err.message.toLowerCase()
         if (msg.includes('row-level security') || msg.includes('rls') || msg.includes('policy')) {
           userFriendlyMessage = 'Permission denied. Please log in again.'
@@ -277,6 +302,19 @@ export function useDayCard(date: string) {
           userFriendlyMessage = 'Database not configured. Contact support.'
         } else if (msg.includes('not-null') || msg.includes('null value') || msg.includes('violates not-null')) {
           userFriendlyMessage = 'Please add a photo first.'
+        } else if (msg.includes('no unique or exclusion constraint') || msg.includes('42p10')) {
+          // Fallback for 42P10 if code wasn't extracted
+          console.error('[useDayCard] ══════════════════════════════════════════════════════════════')
+          console.error('[useDayCard] ❌ CRITICAL: Missing UNIQUE constraint on entries(user_id, entry_date)')
+          console.error('[useDayCard] ')
+          console.error('[useDayCard] FIX: Run this SQL in Supabase SQL Editor:')
+          console.error('[useDayCard] ')
+          console.error('[useDayCard]   ALTER TABLE public.entries')
+          console.error('[useDayCard]   ADD CONSTRAINT entries_user_id_entry_date_key')
+          console.error('[useDayCard]   UNIQUE (user_id, entry_date);')
+          console.error('[useDayCard] ')
+          console.error('[useDayCard] ══════════════════════════════════════════════════════════════')
+          userFriendlyMessage = 'Database configuration error. See console for fix.'
         }
       }
 
