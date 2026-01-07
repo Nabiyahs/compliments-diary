@@ -5,6 +5,7 @@ import { startOfDay } from 'date-fns'
 import { AppIcon } from '@/components/ui/app-icon'
 import { cn, parseDateString } from '@/lib/utils'
 import { uploadPhoto } from '@/lib/image-upload'
+import { StampOverlay } from './stamp-overlay'
 import type { DayCard, StickerState } from '@/types/database'
 
 const DEBUG = process.env.NODE_ENV === 'development'
@@ -59,10 +60,14 @@ export function PolaroidCard({
 
   // UI state
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [playStampAnimation, setPlayStampAnimation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoAreaRef = useRef<HTMLDivElement>(null)
 
   const stickers = dayCard?.sticker_state || []
+
+  // Show stamp if entry has a photo (saved entry)
+  const showStamp = Boolean(dayCard?.photo_path)
 
   // Sync praise draft when dayCard changes (e.g., date navigation)
   useEffect(() => {
@@ -72,6 +77,7 @@ export function PolaroidCard({
     setPendingPhotoPath(null)
     setPendingPhotoPreview(null)
     setIsEditing(false)
+    setPlayStampAnimation(false)
     onEditingChange?.(false)
   }, [dayCard?.praise, dayCard?.entry_date, onEditingChange])
 
@@ -207,6 +213,9 @@ export function PolaroidCard({
       setPendingPhotoPreview(null)
       setIsEditing(false)
       onEditingChange?.(false)
+
+      // Trigger stamp animation after successful save
+      setPlayStampAnimation(true)
 
       // Handle refresh warning separately (not a save failure)
       if (result.refreshError) {
@@ -471,6 +480,13 @@ export function PolaroidCard({
             <AppIcon name="spinner" className="w-4 h-4 animate-spin text-pink-500" />
           </div>
         )}
+
+        {/* Stamp overlay - Day View only */}
+        <StampOverlay
+          show={showStamp}
+          playAnimation={playStampAnimation}
+          onAnimationComplete={() => setPlayStampAnimation(false)}
+        />
       </div>
 
       {/* Emoji picker popup */}
