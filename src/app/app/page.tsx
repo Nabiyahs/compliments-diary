@@ -255,7 +255,6 @@ export default function AppPage() {
       <ExportModal
         isOpen={exportOpen}
         onClose={() => setExportOpen(false)}
-        selectedDate={selectedDate}
       />
 
       {/* Debug Panel (Development only) */}

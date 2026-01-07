@@ -1,17 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { jsPDF } from 'jspdf'
 import { AppIcon } from '@/components/ui/app-icon'
 import { cn } from '@/lib/utils'
 import { getSupabaseClient } from '@/lib/supabase/client'
 
-type ExportType = 'day' | 'week' | 'month' | 'liked'
+// View type determines how entries are grouped in PDF, NOT the query range
+type ViewType = 'day' | 'week' | 'month'
+type ExportMode = 'range' | 'liked'
 
 interface ExportModalProps {
   isOpen: boolean
   onClose: () => void
-  selectedDate?: string // YYYY-MM-DD format
 }
 
 interface EntryData {
@@ -25,7 +26,7 @@ interface EntryData {
 
 // Format date for display
 function formatDisplayDate(dateStr: string): string {
-  const date = new Date(dateStr)
+  const date = new Date(dateStr + 'T00:00:00')
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -33,30 +34,80 @@ function formatDisplayDate(dateStr: string): string {
   })
 }
 
-// Get week range for a date
-function getWeekRange(dateStr: string): { start: string; end: string } {
-  const date = new Date(dateStr)
+// Get ISO week number and year
+function getWeekInfo(dateStr: string): { weekNum: number; year: number; weekStart: string; weekEnd: string } {
+  const date = new Date(dateStr + 'T00:00:00')
   const day = date.getDay()
-  const start = new Date(date)
-  start.setDate(date.getDate() - day)
-  const end = new Date(start)
-  end.setDate(start.getDate() + 6)
+  // Week starts on Sunday (day 0)
+  const weekStart = new Date(date)
+  weekStart.setDate(date.getDate() - day)
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 6)
+
+  // Get week number (simple calculation)
+  const startOfYear = new Date(date.getFullYear(), 0, 1)
+  const days = Math.floor((date.getTime() - startOfYear.getTime()) / (24 * 60 * 60 * 1000))
+  const weekNum = Math.ceil((days + startOfYear.getDay() + 1) / 7)
 
   return {
-    start: start.toISOString().split('T')[0],
-    end: end.toISOString().split('T')[0],
+    weekNum,
+    year: date.getFullYear(),
+    weekStart: weekStart.toISOString().split('T')[0],
+    weekEnd: weekEnd.toISOString().split('T')[0],
   }
 }
 
-// Get month range for a date
-function getMonthRange(dateStr: string): { start: string; end: string } {
-  const date = new Date(dateStr)
-  const start = new Date(date.getFullYear(), date.getMonth(), 1)
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0)
-
+// Get month info
+function getMonthInfo(dateStr: string): { month: number; year: number; monthName: string } {
+  const date = new Date(dateStr + 'T00:00:00')
   return {
-    start: start.toISOString().split('T')[0],
-    end: end.toISOString().split('T')[0],
+    month: date.getMonth(),
+    year: date.getFullYear(),
+    monthName: date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+  }
+}
+
+// Group entries by view type
+function groupEntriesByView(entries: EntryData[], viewType: ViewType): Map<string, EntryData[]> {
+  const groups = new Map<string, EntryData[]>()
+
+  for (const entry of entries) {
+    let groupKey: string
+
+    if (viewType === 'day') {
+      groupKey = entry.entry_date
+    } else if (viewType === 'week') {
+      const { year, weekNum } = getWeekInfo(entry.entry_date)
+      groupKey = `${year}-W${weekNum.toString().padStart(2, '0')}`
+    } else {
+      const { year, month } = getMonthInfo(entry.entry_date)
+      groupKey = `${year}-${(month + 1).toString().padStart(2, '0')}`
+    }
+
+    if (!groups.has(groupKey)) {
+      groups.set(groupKey, [])
+    }
+    groups.get(groupKey)!.push(entry)
+  }
+
+  return groups
+}
+
+// Get group title for PDF section header
+function getGroupTitle(groupKey: string, viewType: ViewType, entries: EntryData[]): string {
+  if (viewType === 'day') {
+    return formatDisplayDate(groupKey)
+  } else if (viewType === 'week') {
+    // groupKey is like "2026-W01"
+    const firstEntry = entries[0]
+    const lastEntry = entries[entries.length - 1]
+    const { weekStart, weekEnd } = getWeekInfo(firstEntry.entry_date)
+    return `Week: ${formatDisplayDate(weekStart)} - ${formatDisplayDate(weekEnd)}`
+  } else {
+    // groupKey is like "2026-01"
+    const [year, month] = groupKey.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   }
 }
 
@@ -82,16 +133,37 @@ async function loadImageAsBase64(url: string): Promise<string | null> {
 export function ExportModal({
   isOpen,
   onClose,
-  selectedDate = new Date().toISOString().split('T')[0],
 }: ExportModalProps) {
-  const [exportType, setExportType] = useState<ExportType>('day')
+  // Export mode: range (with date picker) or liked (favorites)
+  const [exportMode, setExportMode] = useState<ExportMode>('range')
+
+  // Date range for 'range' mode
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+
+  // View type for grouping (only affects PDF layout, not query)
+  const [viewType, setViewType] = useState<ViewType>('day')
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [likedCount, setLikedCount] = useState<number | null>(null)
 
   const supabase = getSupabaseClient()
 
-  // Check liked count when modal opens or type changes to 'liked'
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setError(null)
+      checkLikedCount()
+      // Set default date range to current month
+      const today = new Date()
+      const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+      setFromDate(firstOfMonth.toISOString().split('T')[0])
+      setToDate(today.toISOString().split('T')[0])
+    }
+  }, [isOpen])
+
+  // Check liked count
   const checkLikedCount = async () => {
     const { count } = await supabase
       .from('entries')
@@ -100,23 +172,36 @@ export function ExportModal({
     setLikedCount(count || 0)
   }
 
-  // Fetch entries based on export type
+  // Validate date range
+  const isDateRangeValid = (): boolean => {
+    if (exportMode === 'liked') return true
+    if (!fromDate || !toDate) return false
+    return fromDate <= toDate
+  }
+
+  // Get validation error message
+  const getValidationError = (): string | null => {
+    if (exportMode === 'liked') {
+      if (likedCount === 0) return 'No favorite entries yet'
+      return null
+    }
+    if (!fromDate || !toDate) return 'Please select date range'
+    if (fromDate > toDate) return 'From date must be before To date'
+    return null
+  }
+
+  // Fetch entries based on mode
   const fetchEntries = async (): Promise<EntryData[]> => {
     let query = supabase
       .from('entries')
       .select('id, entry_date, praise, photo_path, is_liked')
       .order('entry_date', { ascending: true })
 
-    if (exportType === 'day') {
-      query = query.eq('entry_date', selectedDate)
-    } else if (exportType === 'week') {
-      const { start, end } = getWeekRange(selectedDate)
-      query = query.gte('entry_date', start).lte('entry_date', end)
-    } else if (exportType === 'month') {
-      const { start, end } = getMonthRange(selectedDate)
-      query = query.gte('entry_date', start).lte('entry_date', end)
-    } else if (exportType === 'liked') {
+    if (exportMode === 'liked') {
       query = query.eq('is_liked', true)
+    } else {
+      // Always query by date range
+      query = query.gte('entry_date', fromDate).lte('entry_date', toDate)
     }
 
     const { data, error: fetchError } = await query
@@ -143,7 +228,6 @@ export function ExportModal({
 
         if (urlError) {
           console.warn('[ExportPDF] Signed URL error for', entry.photo_path, ':', urlError.message)
-          // Continue without photo
         } else {
           photoUrl = data?.signedUrl
         }
@@ -157,21 +241,13 @@ export function ExportModal({
 
   // Generate PDF filename
   const getFilename = (): string => {
-    if (exportType === 'day') {
-      return `DayPat_Day_${selectedDate}.pdf`
-    } else if (exportType === 'week') {
-      const { start, end } = getWeekRange(selectedDate)
-      return `DayPat_Week_${start}_to_${end}.pdf`
-    } else if (exportType === 'month') {
-      const date = new Date(selectedDate)
-      const monthStr = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).replace(' ', '_')
-      return `DayPat_Month_${monthStr}.pdf`
-    } else {
-      return `DayPat_Liked.pdf`
+    if (exportMode === 'liked') {
+      return 'DayPat_Favorites.pdf'
     }
+    return `DayPat_${fromDate}_to_${toDate}_${viewType}.pdf`
   }
 
-  // Generate PDF
+  // Generate PDF with grouping based on view type
   const generatePDF = async (entries: EntryData[]) => {
     const pdf = new jsPDF({
       orientation: 'portrait',
@@ -184,84 +260,113 @@ export function ExportModal({
     const margin = 20
     const contentWidth = pageWidth - margin * 2
 
-    let currentY = margin
-    let isFirstEntry = true
+    // Group entries by view type (for range mode) or just list them (for liked mode)
+    const groups = exportMode === 'liked'
+      ? new Map([['Favorites', entries]])
+      : groupEntriesByView(entries, viewType)
 
-    for (const entry of entries) {
-      // Add new page if needed (not for first entry)
-      if (!isFirstEntry) {
+    let isFirstGroup = true
+
+    for (const [groupKey, groupEntries] of groups) {
+      // Add page break between groups (except first)
+      if (!isFirstGroup) {
         pdf.addPage()
-        currentY = margin
       }
-      isFirstEntry = false
+      isFirstGroup = false
 
-      // Date header
-      pdf.setFontSize(14)
-      pdf.setTextColor(100, 100, 100)
-      const dateText = formatDisplayDate(entry.entry_date)
-      pdf.text(dateText, margin, currentY)
+      let currentY = margin
 
-      // Liked indicator
-      if (entry.is_liked) {
-        pdf.setTextColor(239, 68, 68) // red-500
-        pdf.text(' ♥', margin + pdf.getTextWidth(dateText), currentY)
+      // Group header (for range mode with week/month view)
+      if (exportMode === 'range' && viewType !== 'day') {
+        const groupTitle = getGroupTitle(groupKey, viewType, groupEntries)
+        pdf.setFontSize(16)
+        pdf.setTextColor(80, 80, 80)
+        pdf.setFont('helvetica', 'bold')
+        pdf.text(groupTitle, margin, currentY)
+        currentY += 12
+
+        // Divider line
+        pdf.setDrawColor(200, 200, 200)
+        pdf.line(margin, currentY, pageWidth - margin, currentY)
+        currentY += 8
+        pdf.setFont('helvetica', 'normal')
       }
 
-      currentY += 10
+      // Render entries in this group
+      let isFirstEntry = true
+      for (const entry of groupEntries) {
+        // Check if we need a new page
+        const estimatedHeight = 200 // rough estimate for entry
+        if (currentY + estimatedHeight > pageHeight - margin && !isFirstEntry) {
+          pdf.addPage()
+          currentY = margin
+        }
+        isFirstEntry = false
 
-      // Photo
-      if (entry.photoUrl) {
-        const imageData = await loadImageAsBase64(entry.photoUrl)
-        if (imageData) {
-          try {
-            // Calculate image dimensions to fit width while maintaining aspect ratio
-            const img = new Image()
-            await new Promise((resolve, reject) => {
-              img.onload = resolve
-              img.onerror = reject
-              img.src = imageData
-            })
+        // Date header
+        pdf.setFontSize(14)
+        pdf.setTextColor(100, 100, 100)
+        const dateText = formatDisplayDate(entry.entry_date)
+        pdf.text(dateText, margin, currentY)
 
-            const aspectRatio = img.height / img.width
-            const imageWidth = contentWidth
-            const imageHeight = imageWidth * aspectRatio
+        // Liked indicator
+        if (entry.is_liked) {
+          pdf.setTextColor(239, 68, 68) // red-500
+          pdf.text(' ♥', margin + pdf.getTextWidth(dateText), currentY)
+        }
 
-            // Check if image fits on page, if not scale down
-            const maxImageHeight = pageHeight - currentY - margin - 30 // Leave room for text
-            const finalHeight = Math.min(imageHeight, maxImageHeight)
-            const finalWidth = finalHeight / aspectRatio
+        currentY += 10
 
-            // Center the image
-            const imageX = margin + (contentWidth - finalWidth) / 2
+        // Photo
+        if (entry.photoUrl) {
+          const imageData = await loadImageAsBase64(entry.photoUrl)
+          if (imageData) {
+            try {
+              const img = new Image()
+              await new Promise((resolve, reject) => {
+                img.onload = resolve
+                img.onerror = reject
+                img.src = imageData
+              })
 
-            pdf.addImage(imageData, 'WEBP', imageX, currentY, finalWidth, finalHeight)
-            currentY += finalHeight + 8
-          } catch (imgErr) {
-            console.warn('[ExportPDF] Failed to add image to PDF:', imgErr)
-            // Continue without image
-            pdf.setFontSize(10)
-            pdf.setTextColor(150, 150, 150)
-            pdf.text('[Photo unavailable]', margin, currentY)
-            currentY += 10
+              const aspectRatio = img.height / img.width
+              const imageWidth = contentWidth
+              const imageHeight = imageWidth * aspectRatio
+
+              const maxImageHeight = pageHeight - currentY - margin - 30
+              const finalHeight = Math.min(imageHeight, maxImageHeight)
+              const finalWidth = finalHeight / aspectRatio
+
+              const imageX = margin + (contentWidth - finalWidth) / 2
+
+              pdf.addImage(imageData, 'WEBP', imageX, currentY, finalWidth, finalHeight)
+              currentY += finalHeight + 8
+            } catch (imgErr) {
+              console.warn('[ExportPDF] Failed to add image to PDF:', imgErr)
+              pdf.setFontSize(10)
+              pdf.setTextColor(150, 150, 150)
+              pdf.text('[Photo unavailable]', margin, currentY)
+              currentY += 10
+            }
           }
         }
-      }
 
-      // Praise text
-      if (entry.praise) {
-        pdf.setFontSize(12)
-        pdf.setTextColor(60, 60, 60)
+        // Praise text
+        if (entry.praise) {
+          pdf.setFontSize(12)
+          pdf.setTextColor(60, 60, 60)
 
-        // Word wrap the text
-        const lines = pdf.splitTextToSize(entry.praise, contentWidth)
+          const lines = pdf.splitTextToSize(entry.praise, contentWidth)
+          const lineHeight = 6
+          const availableHeight = pageHeight - currentY - margin
+          const maxLines = Math.floor(availableHeight / lineHeight)
+          const displayLines = lines.slice(0, maxLines)
 
-        // Check if text fits, if not truncate
-        const lineHeight = 6
-        const availableHeight = pageHeight - currentY - margin
-        const maxLines = Math.floor(availableHeight / lineHeight)
-        const displayLines = lines.slice(0, maxLines)
-
-        pdf.text(displayLines, margin, currentY)
+          pdf.text(displayLines, margin, currentY)
+          currentY += displayLines.length * lineHeight + 15
+        } else {
+          currentY += 15
+        }
       }
     }
 
@@ -271,11 +376,16 @@ export function ExportModal({
 
   // Handle export
   const handleExport = async () => {
+    const validationError = getValidationError()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
     setLoading(true)
     setError(null)
 
     try {
-      // Fetch entries
       const entries = await fetchEntries()
 
       if (entries.length === 0) {
@@ -284,13 +394,9 @@ export function ExportModal({
         return
       }
 
-      // Load photos
       const entriesWithPhotos = await loadPhotos(entries)
-
-      // Generate PDF
       await generatePDF(entriesWithPhotos)
 
-      // Success - close modal
       onClose()
     } catch (err) {
       console.error('[ExportPDF] Export error:', err)
@@ -300,21 +406,10 @@ export function ExportModal({
     }
   }
 
-  // When modal opens, check liked count
-  if (isOpen && likedCount === null) {
-    checkLikedCount()
-  }
-
   if (!isOpen) return null
 
-  const exportOptions: { type: ExportType; label: string; description: string }[] = [
-    { type: 'day', label: 'Day', description: formatDisplayDate(selectedDate) },
-    { type: 'week', label: 'Week', description: `${formatDisplayDate(getWeekRange(selectedDate).start)} - ${formatDisplayDate(getWeekRange(selectedDate).end)}` },
-    { type: 'month', label: 'Month', description: new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) },
-    { type: 'liked', label: 'Favorites', description: likedCount !== null ? `${likedCount} entries` : 'Loading...' },
-  ]
-
-  const isLikedDisabled = exportType === 'liked' && likedCount === 0
+  const validationError = getValidationError()
+  const canExport = !validationError && !loading
 
   return (
     <div
@@ -325,7 +420,7 @@ export function ExportModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden"
+        className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -340,54 +435,107 @@ export function ExportModal({
           </button>
         </div>
 
-        <div className="p-6">
-          {/* Export Type Options */}
-          <div className="space-y-3 mb-6">
-            <p className="text-sm font-medium text-gray-700 mb-3">Select export range:</p>
-            {exportOptions.map((option) => (
+        <div className="p-6 space-y-5">
+          {/* Export Mode Toggle */}
+          <div>
+            <p className="text-sm font-medium text-gray-700 mb-3">Export type:</p>
+            <div className="flex gap-2">
               <button
-                key={option.type}
-                onClick={() => setExportType(option.type)}
-                disabled={loading || (option.type === 'liked' && likedCount === 0)}
+                onClick={() => setExportMode('range')}
+                disabled={loading}
                 className={cn(
-                  'w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all text-left',
-                  exportType === option.type
-                    ? 'border-orange-500 bg-orange-50'
-                    : 'border-gray-200 hover:border-gray-300',
-                  (option.type === 'liked' && likedCount === 0) && 'opacity-50 cursor-not-allowed'
+                  'flex-1 py-2.5 px-4 rounded-xl border-2 font-medium transition-all',
+                  exportMode === 'range'
+                    ? 'border-orange-500 bg-orange-50 text-orange-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 )}
               >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    'w-5 h-5 rounded-full border-2 flex items-center justify-center',
-                    exportType === option.type ? 'border-orange-500' : 'border-gray-300'
-                  )}>
-                    {exportType === option.type && (
-                      <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{option.label}</p>
-                    <p className="text-xs text-gray-500">{option.description}</p>
-                  </div>
-                </div>
-                {option.type === 'liked' && (
-                  <AppIcon name="heart" className="w-5 h-5 text-red-500" />
-                )}
+                Date Range
               </button>
-            ))}
+              <button
+                onClick={() => setExportMode('liked')}
+                disabled={loading || likedCount === 0}
+                className={cn(
+                  'flex-1 py-2.5 px-4 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2',
+                  exportMode === 'liked'
+                    ? 'border-orange-500 bg-orange-50 text-orange-700'
+                    : 'border-gray-200 hover:border-gray-300 text-gray-600',
+                  likedCount === 0 && 'opacity-50 cursor-not-allowed'
+                )}
+              >
+                <AppIcon name="heart" className="w-4 h-4 text-red-500" />
+                Favorites
+                {likedCount !== null && <span className="text-xs">({likedCount})</span>}
+              </button>
+            </div>
           </div>
 
-          {/* Liked warning */}
-          {exportType === 'liked' && likedCount === 0 && (
-            <p className="text-sm text-gray-500 text-center mb-4">
+          {/* Date Range Selection (only for 'range' mode) */}
+          {exportMode === 'range' && (
+            <>
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-3">Select date range:</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">From</label>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
+                      disabled={loading}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">To</label>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
+                      disabled={loading}
+                      className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* View Type Selection */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-3">Group by:</p>
+                <div className="flex gap-2">
+                  {(['day', 'week', 'month'] as ViewType[]).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => setViewType(type)}
+                      disabled={loading}
+                      className={cn(
+                        'flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all capitalize',
+                        viewType === type
+                          ? 'border-orange-500 bg-orange-50 text-orange-700'
+                          : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                      )}
+                    >
+                      {type}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-2">
+                  Entries will be grouped by {viewType} in the PDF
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Liked mode info */}
+          {exportMode === 'liked' && likedCount === 0 && (
+            <p className="text-sm text-gray-500 text-center py-2">
               No favorite entries yet. Like some entries first!
             </p>
           )}
 
           {/* Error message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
@@ -395,7 +543,7 @@ export function ExportModal({
           {/* Export button */}
           <button
             onClick={handleExport}
-            disabled={loading || isLikedDisabled}
+            disabled={!canExport}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
           >
             {loading ? (
