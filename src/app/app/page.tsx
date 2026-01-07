@@ -60,7 +60,7 @@ export default function AppPage() {
           let photoUrl = ''
           if (entry.photo_url) {
             const { data } = await supabase.storage
-              .from('photos')
+              .from('entry-photos')
               .createSignedUrl(entry.photo_url, 3600)
             photoUrl = data?.signedUrl || ''
           }

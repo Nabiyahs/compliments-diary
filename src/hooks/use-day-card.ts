@@ -172,7 +172,14 @@ export function useDayCard(date: string) {
           : (dayCard?.caption || ''),
       }
 
-      if (DEBUG) console.log('[useDayCard] Upserting to entries table:', payload)
+      if (DEBUG) {
+        console.log('[useDayCard] ═══════════════════════════════════════')
+        console.log('[useDayCard] DB SAVE - photo_path:', payload.photo_path)
+        console.log('[useDayCard] DB SAVE - entry_date:', payload.entry_date)
+        console.log('[useDayCard] DB SAVE - user_id:', payload.user_id)
+        console.log('[useDayCard] DB SAVE - praise length:', payload.praise?.length || 0)
+        console.log('[useDayCard] ═══════════════════════════════════════')
+      }
 
       const { data, error: dbError } = await supabase
         .from('entries')
@@ -196,7 +203,11 @@ export function useDayCard(date: string) {
         throw dbError
       }
 
-      if (DEBUG) console.log('[useDayCard] Save successful:', data)
+      if (DEBUG) {
+        console.log('[useDayCard] ✅ Save successful!')
+        console.log('[useDayCard] DB returned photo_path:', data.photo_path)
+        console.log('[useDayCard] DB returned entry_date:', data.entry_date)
+      }
 
       const updatedCard = toDayCard(data)
       setDayCard(updatedCard)
