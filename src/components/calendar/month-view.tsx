@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import { format, isSameMonth, isToday, startOfMonth, addMonths, subMonths } from 'date-fns'
 import { AppIcon } from '@/components/ui/app-icon'
 import { useMonthData } from '@/hooks/use-month-data'
-import { getCalendarDays, formatDateString } from '@/lib/utils'
+import { formatDateString } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 
 interface MonthViewProps {
@@ -14,7 +14,6 @@ interface MonthViewProps {
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 export function MonthView({ onSelectDate }: MonthViewProps) {
-
   const [currentMonth, setCurrentMonth] = useState(new Date())
 
   const year = currentMonth.getFullYear()
@@ -62,20 +61,19 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
 
   return (
     <div>
-      {/* Month Navigation - matches reference: prev/next + "Month Year" centered */}
+      {/* Month Navigation */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={goToPrevMonth}
             className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
             aria-label="Previous month"
-            data-testid="btn-month-prev"
           >
             <AppIcon name="chevron-left" className="w-5 h-5 text-gray-600" />
           </button>
 
           <div className="text-center">
-            <h2 className="text-xl font-bold text-gray-800" data-testid="month-title">
+            <h2 className="text-xl font-bold text-gray-800">
               {format(currentMonth, 'MMMM yyyy')}
             </h2>
           </div>
@@ -84,21 +82,20 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
             onClick={goToNextMonth}
             className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
             aria-label="Next month"
-            data-testid="btn-month-next"
           >
             <AppIcon name="chevron-right" className="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
 
-      {/* Calendar Grid - matches reference: Mon-Sun columns */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-lg">
+      {/* Calendar Grid - matches reference design */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4">
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-2 mb-3">
+        <div className="grid grid-cols-7 gap-1 mb-2">
           {WEEKDAYS.map((day) => (
             <div
               key={day}
-              className="text-center text-sm font-semibold text-gray-500 py-2"
+              className="text-center text-xs font-semibold text-gray-500 py-2"
             >
               {day}
             </div>
@@ -106,7 +103,7 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
         </div>
 
         {/* Calendar Days */}
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-1">
           {calendarDays.map((date, index) => {
             const dateStr = formatDateString(date)
             const isCurrentMonth = isSameMonth(date, currentMonth)
@@ -121,14 +118,10 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
               )
             }
 
-            // Non-month days at the end
+            // Non-month days at the end (hidden)
             if (!isCurrentMonth) {
               return (
-                <div key={index} className="aspect-square bg-gray-50 rounded-lg p-0.5 relative opacity-40">
-                  <span className="absolute top-1 left-1 text-[10px] font-semibold text-gray-400 z-10">
-                    {date.getDate()}
-                  </span>
-                </div>
+                <div key={index} className="aspect-square bg-gray-50 rounded-lg" />
               )
             }
 
@@ -140,28 +133,28 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                 className={cn(
                   'aspect-square rounded-lg p-0.5 relative overflow-hidden transition-all',
                   hasPhoto ? '' : 'bg-gray-50',
-                  isCurrentDay && hasPhoto && 'ring-2 ring-[#F2B949] ring-offset-2',
-                  isCurrentDay && !hasPhoto && 'ring-2 ring-[#F2B949]',
+                  isCurrentDay && 'border-2 border-orange-400',
                   !isCurrentDay && 'hover:ring-1 hover:ring-amber-200'
                 )}
-                data-testid={`cell-date-${dateStr}`}
                 aria-label={format(date, 'MMMM d')}
               >
                 {/* Date number */}
                 <span
                   className={cn(
-                    'absolute top-1 left-1 text-[10px] font-semibold z-10',
+                    'absolute top-1 left-1 text-[10px] z-10',
                     hasPhoto
-                      ? 'text-white font-bold drop-shadow-lg'
-                      : dayData?.praiseCount && dayData.praiseCount > 0
-                      ? 'text-gray-700'
-                      : 'text-gray-400'
+                      ? 'text-white font-bold drop-shadow'
+                      : isCurrentDay
+                      ? 'text-orange-600 font-bold'
+                      : date < new Date() && !hasPhoto
+                      ? 'text-gray-700 font-semibold'
+                      : 'text-gray-400 font-semibold'
                   )}
                 >
                   {date.getDate()}
                 </span>
 
-                {/* Photo thumbnail (using thumb_url only - never load original in calendar) */}
+                {/* Photo thumbnail */}
                 {hasPhoto && dayData?.thumbUrl && (
                   <img
                     src={dayData.thumbUrl}
@@ -171,16 +164,16 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                   />
                 )}
 
-                {/* Sticker indicator on photo cells */}
+                {/* Sticker indicator */}
                 {hasPhoto && dayData.stickers && dayData.stickers.length > 0 && (
-                  <div className="absolute bottom-1 right-1">
-                    <span className="text-xs">{dayData.stickers[0]}</span>
+                  <div className="absolute bottom-0.5 right-0.5">
+                    <span className="text-[8px]">{dayData.stickers[0]}</span>
                   </div>
                 )}
 
                 {/* Loading shimmer */}
-                {loading && isCurrentMonth && (
-                  <div className="absolute inset-0 bg-white/50 animate-pulse" />
+                {loading && (
+                  <div className="absolute inset-0 bg-white/50 animate-pulse rounded-lg" />
                 )}
               </button>
             )
