@@ -120,35 +120,60 @@ export function useDayCard(date: string) {
     caption?: string | null   // Will be saved as praise
     sticker_state?: StickerState[] // Ignored - not in entries table
   }): Promise<{ success: boolean; error?: string }> => {
-    // Check authentication first
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    console.log('[useDayCard] ═══════════════════════════════════════════════════')
+    console.log('[useDayCard] SAVE FLOW STARTED')
+    console.log('[useDayCard] Date:', date)
+    console.log('[useDayCard] Updates:', JSON.stringify(updates, null, 2))
+    console.log('[useDayCard] ═══════════════════════════════════════════════════')
 
-    if (authError) {
-      console.error('[useDayCard] Auth error:', authError)
-      return { success: false, error: 'Authentication failed. Please log in again.' }
+    // ═══════════════════════════════════════════════════════════════════
+    // PRE-VALIDATION (Before any DB operation)
+    // ═══════════════════════════════════════════════════════════════════
+
+    // Check authentication first
+    let user
+    try {
+      const { data, error: authError } = await supabase.auth.getUser()
+      if (authError) {
+        console.error('[useDayCard] ❌ Auth check failed')
+        console.error('[useDayCard] Auth error code:', authError.code)
+        console.error('[useDayCard] Auth error message:', authError.message)
+        return { success: false, error: 'Authentication failed. Please log in again.' }
+      }
+      user = data.user
+    } catch (authException) {
+      console.error('[useDayCard] ❌ Auth exception:', authException)
+      if (authException instanceof Error) {
+        console.error('[useDayCard] Stack:', authException.stack)
+      }
+      return { success: false, error: 'Authentication check failed.' }
     }
 
     if (!user) {
-      console.error('[useDayCard] No user found')
+      console.error('[useDayCard] ❌ No user found after auth check')
       return { success: false, error: 'Please log in to save.' }
     }
 
+    console.log('[useDayCard] ✅ Auth check passed, user:', user.id)
+
     // REQUIRED: Photo must exist to save entry
-    // Check if we have a photo (either from updates or existing dayCard)
     const effectivePhotoPath = updates.photo_url !== undefined ? updates.photo_url : dayCard?.photo_url
     if (!effectivePhotoPath) {
-      console.error('[useDayCard] Save blocked - photo is required')
+      console.error('[useDayCard] ❌ Save blocked - photo is required')
+      console.error('[useDayCard] updates.photo_url:', updates.photo_url)
+      console.error('[useDayCard] dayCard?.photo_url:', dayCard?.photo_url)
       return { success: false, error: 'Please add a photo first.' }
     }
 
     // Validate entry_date format (YYYY-MM-DD)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/
     if (!dateRegex.test(date)) {
-      console.error('[useDayCard] Save blocked - invalid date format:', date)
+      console.error('[useDayCard] ❌ Save blocked - invalid date format:', date)
       return { success: false, error: 'Invalid date. Please try again.' }
     }
 
-    if (DEBUG) console.log('[useDayCard] Saving entry for user:', user.id, 'date:', date)
+    console.log('[useDayCard] ✅ Pre-validation passed')
+    console.log('[useDayCard] Effective photo_path:', effectivePhotoPath)
 
     setSaving(true)
     setError(null)
@@ -166,35 +191,22 @@ export function useDayCard(date: string) {
       created_at: string
     } | null = null
 
+    // Build the payload OUTSIDE try block for debugging
+    const payload = {
+      user_id: user.id,
+      entry_date: date,
+      photo_path: effectivePhotoPath,
+      praise: updates.caption !== undefined
+        ? (updates.caption || '')
+        : (dayCard?.caption || ''),
+    }
+
+    console.log('[useDayCard] ═══════════════════════════════════════')
+    console.log('[useDayCard] STAGE 2: DB SAVE')
+    console.log('[useDayCard] Payload:', JSON.stringify(payload, null, 2))
+    console.log('[useDayCard] ═══════════════════════════════════════')
+
     try {
-      // Build the payload with correct column names for entries table
-      // Both photo_path and praise are required (NOT NULL in DB)
-      const payload: {
-        user_id: string
-        entry_date: string
-        photo_path: string
-        praise: string
-      } = {
-        user_id: user.id,
-        entry_date: date, // YYYY-MM-DD format
-        // photo_path is required - use EXACTLY as provided, no manipulation
-        photo_path: (updates.photo_url !== undefined ? updates.photo_url : dayCard?.photo_url) as string,
-        // praise is required - default to empty string if not provided
-        praise: updates.caption !== undefined
-          ? (updates.caption || '')
-          : (dayCard?.caption || ''),
-      }
-
-      if (DEBUG) {
-        console.log('[useDayCard] ═══════════════════════════════════════')
-        console.log('[useDayCard] STAGE 2: DB SAVE')
-        console.log('[useDayCard] photo_path:', payload.photo_path)
-        console.log('[useDayCard] entry_date:', payload.entry_date)
-        console.log('[useDayCard] user_id:', payload.user_id)
-        console.log('[useDayCard] praise length:', payload.praise?.length || 0)
-        console.log('[useDayCard] ═══════════════════════════════════════')
-      }
-
       const { data, error: dbError } = await supabase
         .from('entries')
         .upsert(payload, { onConflict: 'user_id,entry_date' })
@@ -202,7 +214,6 @@ export function useDayCard(date: string) {
         .single()
 
       if (dbError) {
-        // Log detailed error info for debugging (dev console only)
         console.error('[useDayCard] ❌ STAGE 2 FAILED: DB upsert error')
         console.error('[useDayCard] Error code:', dbError.code)
         console.error('[useDayCard] Error message:', dbError.message)
@@ -211,14 +222,27 @@ export function useDayCard(date: string) {
         throw dbError
       }
 
-      savedData = data
-      if (DEBUG) {
+      // Check if data was returned (should always be returned on success)
+      if (!data) {
+        console.warn('[useDayCard] ⚠️ STAGE 2: Upsert succeeded but no data returned')
+        console.warn('[useDayCard] This may indicate RLS SELECT policy issue')
+        // Still consider this a success - the write happened
+        // We just couldn't read back the data
+      } else {
+        savedData = data
         console.log('[useDayCard] ✅ STAGE 2 SUCCESS: DB save complete')
-        console.log('[useDayCard] Saved photo_path:', data.photo_path)
+        console.log('[useDayCard] Returned data:', JSON.stringify(data, null, 2))
       }
     } catch (err) {
       // DB save failed - this is a real failure
-      console.error('[useDayCard] Save error:', err)
+      console.error('[useDayCard] ❌ STAGE 2 EXCEPTION')
+      console.error('[useDayCard] Error type:', typeof err)
+      console.error('[useDayCard] Error:', err)
+      if (err instanceof Error) {
+        console.error('[useDayCard] Error name:', err.name)
+        console.error('[useDayCard] Error message:', err.message)
+        console.error('[useDayCard] Error stack:', err.stack)
+      }
 
       // Provide specific error messages based on error type
       let userFriendlyMessage = 'Failed to save. Please try again.'
@@ -237,6 +261,10 @@ export function useDayCard(date: string) {
           userFriendlyMessage = 'Database not configured. Contact support.'
         } else if (msg.includes('not-null') || msg.includes('null value') || msg.includes('violates not-null')) {
           userFriendlyMessage = 'Please add a photo first.'
+        } else if (msg.includes('pgrst116') || msg.includes('json object requested')) {
+          // .single() returned 0 rows - but upsert should have written
+          console.warn('[useDayCard] .single() returned no rows - checking if write succeeded anyway')
+          userFriendlyMessage = 'Save may have succeeded but could not verify. Please refresh.'
         }
       }
 
@@ -247,46 +275,64 @@ export function useDayCard(date: string) {
 
     // ═══════════════════════════════════════════════════════════════════
     // STAGE 3: POST-SAVE PROCESSING (Non-critical - failure = warning only)
+    // DB save succeeded at this point. Errors here don't mean "save failed"
     // ═══════════════════════════════════════════════════════════════════
-    // At this point, DB save succeeded. Update local state and fetch signed URL.
-    // Errors here should NOT cause "save failed" - just log warnings.
+    console.log('[useDayCard] ═══════════════════════════════════════')
+    console.log('[useDayCard] STAGE 3: POST-SAVE PROCESSING')
+    console.log('[useDayCard] savedData available:', !!savedData)
+    console.log('[useDayCard] ═══════════════════════════════════════')
 
-    if (DEBUG) console.log('[useDayCard] STAGE 3: Post-save processing')
-
-    // Update local state with saved data
+    // 3a. Update local state with saved data
     if (savedData) {
-      const updatedCard = toDayCard(savedData)
-      setDayCard(updatedCard)
+      try {
+        const updatedCard = toDayCard(savedData)
+        setDayCard(updatedCard)
+        console.log('[useDayCard] ✅ Stage 3a: Local state updated')
+      } catch (stateError) {
+        console.warn('[useDayCard] ⚠️ Stage 3a WARNING: Failed to update local state')
+        console.warn('[useDayCard] Error:', stateError)
+        // Don't fail - save succeeded
+      }
+    } else {
+      console.warn('[useDayCard] ⚠️ Stage 3a: No savedData to update local state')
+      // Force refetch since we don't have the data
+      try {
+        await fetchDayCard()
+        console.log('[useDayCard] ✅ Stage 3a: Refetched data after save')
+      } catch (refetchError) {
+        console.warn('[useDayCard] ⚠️ Stage 3a WARNING: Refetch failed')
+        console.warn('[useDayCard] Error:', refetchError)
+      }
     }
 
-    // Fetch new signed URL if photo_path changed
-    if (updates.photo_url !== undefined && savedData?.photo_path) {
+    // 3b. Fetch signed URL if photo changed
+    if (updates.photo_url !== undefined) {
+      const photoPathForUrl = savedData?.photo_path || payload.photo_path
+      console.log('[useDayCard] Stage 3b: Fetching signed URL for:', photoPathForUrl)
+
       try {
-        if (DEBUG) {
-          console.log('[useDayCard] Fetching signed URL for:', savedData.photo_path)
-        }
-        const newSignedUrl = await fetchSignedUrl(savedData.photo_path)
+        const newSignedUrl = await fetchSignedUrl(photoPathForUrl)
         if (newSignedUrl) {
           setPhotoSignedUrl(newSignedUrl)
-          if (DEBUG) console.log('[useDayCard] ✅ Signed URL fetched successfully')
+          console.log('[useDayCard] ✅ Stage 3b: Signed URL fetched')
         } else {
-          // Signed URL failed but save succeeded - just warn
-          console.warn('[useDayCard] ⚠️ STAGE 3 WARNING: Could not get signed URL')
-          console.warn('[useDayCard] photo_path:', savedData.photo_path)
-          // Keep any existing photo visible
+          console.warn('[useDayCard] ⚠️ Stage 3b WARNING: fetchSignedUrl returned null')
+          console.warn('[useDayCard] photo_path used:', photoPathForUrl)
         }
       } catch (signedUrlError) {
-        // Signed URL error - log but don't fail the save
-        console.warn('[useDayCard] ⚠️ STAGE 3 WARNING: Signed URL fetch error')
+        console.warn('[useDayCard] ⚠️ Stage 3b WARNING: Signed URL fetch error')
+        console.warn('[useDayCard] Error:', signedUrlError)
         if (signedUrlError instanceof Error) {
-          console.warn('[useDayCard] Error:', signedUrlError.message)
+          console.warn('[useDayCard] Stack:', signedUrlError.stack)
         }
-        // Photo was saved successfully, just URL fetch had issues
+        // Don't fail - save succeeded
       }
     }
 
     setSaving(false)
-    if (DEBUG) console.log('[useDayCard] ✅ Save complete (all stages)')
+    console.log('[useDayCard] ═══════════════════════════════════════')
+    console.log('[useDayCard] ✅ SAVE FLOW COMPLETE - SUCCESS')
+    console.log('[useDayCard] ═══════════════════════════════════════')
     return { success: true }
   }
 
