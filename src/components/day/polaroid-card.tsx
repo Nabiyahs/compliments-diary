@@ -273,23 +273,23 @@ export function PolaroidCard({
   }
 
   return (
-    <div className="w-full relative">
-      {/* Polaroid frame - matches reference: rounded-3xl shadow-xl p-5 rotate-[-1deg] */}
+    <div className="w-full max-w-[340px] mx-auto relative">
+      {/* Polaroid frame - constrained width with balanced padding */}
       <div
-        className="bg-white rounded-3xl shadow-xl p-5 mb-6 relative"
+        className="bg-white rounded-2xl shadow-xl p-4 mb-4 relative"
         style={{ transform: 'rotate(-1deg)' }}
       >
-        {/* Photo area - matches reference: bg-gray-100 rounded-2xl h-[340px] */}
+        {/* Photo area - slightly reduced height */}
         <div
           ref={photoAreaRef}
-          className="bg-gray-100 rounded-2xl overflow-hidden mb-4 relative"
+          className="bg-gray-100 rounded-xl overflow-hidden mb-3 relative"
         >
           {displayPhotoUrl ? (
             <>
               <img
                 src={displayPhotoUrl}
                 alt="Day photo"
-                className="w-full h-[340px] object-cover"
+                className="w-full h-[280px] object-cover"
               />
               {/* Change photo button - only clickable in edit mode */}
               <button
@@ -312,7 +312,7 @@ export function PolaroidCard({
               onClick={handleCameraClick}
               disabled={uploading || !isEditing}
               className={cn(
-                'w-full h-[340px] flex flex-col items-center justify-center gap-2 transition-colors',
+                'w-full h-[280px] flex flex-col items-center justify-center gap-2 transition-colors',
                 isEditing
                   ? 'text-gray-400 hover:text-gray-500 cursor-pointer'
                   : 'text-gray-300 cursor-not-allowed'
