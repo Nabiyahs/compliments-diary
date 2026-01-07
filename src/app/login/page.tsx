@@ -51,6 +51,7 @@ const dict = {
 
 function LoginFormContent() {
   const [mode, setMode] = useState<AuthMode>('login')
+  const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -97,6 +98,7 @@ function LoginFormContent() {
   const resetForm = () => {
     setError(null)
     setMessage(null)
+    setDisplayName('')
     setPassword('')
     setConfirmPassword('')
   }
@@ -173,6 +175,9 @@ function LoginFormContent() {
         password,
         options: {
           emailRedirectTo,
+          data: {
+            display_name: displayName.trim() || null,
+          },
         },
       })
 
@@ -189,6 +194,7 @@ function LoginFormContent() {
 
       // Success - show confirmation message
       setMessage(dict.success.checkEmail)
+      setDisplayName('')
       setEmail('')
       setPassword('')
       setConfirmPassword('')
@@ -383,6 +389,24 @@ function LoginFormContent() {
           {/* Signup Form */}
           {mode === 'signup' && (
             <form onSubmit={handleSignup} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Your Name
+                </label>
+                <div className="relative">
+                  <AppIcon name="user" className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    placeholder="Enter your name"
+                    disabled={loading}
+                    autoComplete="name"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all disabled:bg-gray-50"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {dict.email}

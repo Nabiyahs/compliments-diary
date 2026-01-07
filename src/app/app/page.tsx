@@ -49,19 +49,19 @@ export default function AppPage() {
   const fetchFavorites = async () => {
     const { data: entries } = await supabase
       .from('entries')
-      .select('id, entry_date, caption, photo_url')
+      .select('id, entry_date, praise, photo_path')
       .eq('is_liked', true)
       .order('entry_date', { ascending: false })
 
     if (entries && entries.length > 0) {
       // Get signed URLs for all photos
       const favoritesWithUrls = await Promise.all(
-        entries.map(async (entry: { id: string; entry_date: string; caption: string | null; photo_url: string | null }) => {
+        entries.map(async (entry: { id: string; entry_date: string; praise: string | null; photo_path: string | null }) => {
           let photoUrl = ''
-          if (entry.photo_url) {
+          if (entry.photo_path) {
             const { data } = await supabase.storage
               .from('entry-photos')
-              .createSignedUrl(entry.photo_url, 3600)
+              .createSignedUrl(entry.photo_path, 3600)
             photoUrl = data?.signedUrl || ''
           }
           return {
@@ -71,7 +71,7 @@ export default function AppPage() {
               day: 'numeric',
               year: 'numeric',
             }),
-            caption: entry.caption || '',
+            caption: entry.praise || '',
             photoUrl,
           }
         })
@@ -245,7 +245,7 @@ export default function AppPage() {
           // TODO: Implement PDF export
           console.log('Export to PDF clicked')
         }}
-        userName={user?.user_metadata?.name}
+        userName={user?.user_metadata?.display_name}
         userEmail={user?.email}
         totalEntries={totalEntries}
         currentStreak={currentStreak}

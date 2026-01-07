@@ -22,7 +22,7 @@ interface PolaroidCardProps {
 
 const EMOJI_PALETTE = ['☕', '✨', '💛', '⭐', '🌟', '💖', '🎉', '🌸', '🍀', '🔥', '💪', '🧘‍♀️', '🥗', '💚', '😊', '🥰']
 
-const PLACEHOLDER_TEXT = "What made today special?"
+const PLACEHOLDER_TEXT = "Give your day a pat."
 
 export function PolaroidCard({
   dayCard,
