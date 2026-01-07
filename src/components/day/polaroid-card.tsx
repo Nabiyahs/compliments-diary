@@ -138,6 +138,17 @@ export function PolaroidCard({
 
     if (DEBUG) console.log('[PolaroidCard] Save clicked')
 
+    // Determine the effective photo path (pending new photo or existing photo)
+    const effectivePhotoPath = pendingPhotoPath || dayCard?.photo_url
+
+    // REQUIRED: Photo must exist to save entry
+    if (!effectivePhotoPath) {
+      setUploadError('Please add a photo first')
+      setTimeout(() => setUploadError(null), 3000)
+      if (DEBUG) console.log('[PolaroidCard] Save blocked - no photo')
+      return
+    }
+
     const updates: { photo_url?: string | null; caption?: string | null } = {}
 
     // Check if photo changed
