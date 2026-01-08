@@ -1,0 +1,2084 @@
+[
+  {
+    "id": "airplane",
+    "src": "/sticker/sensa/Airplane.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "angry-face",
+    "src": "/sticker/sensa/Angry face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "anguished-face",
+    "src": "/sticker/sensa/Anguished face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "anxious-face-with-sweat",
+    "src": "/sticker/sensa/Anxious face with sweat.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "astonished-face",
+    "src": "/sticker/sensa/Astonished face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "avocado",
+    "src": "/sticker/sensa/Avocado.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "backhand-index-pointing-down-skin-1",
+    "src": "/sticker/sensa/Backhand index pointing down skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "backhand-index-pointing-down-skin-2",
+    "src": "/sticker/sensa/Backhand index pointing down skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "backhand-index-pointing-down-skin-3",
+    "src": "/sticker/sensa/Backhand index pointing down skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "backhand-index-pointing-down-skin-4",
+    "src": "/sticker/sensa/Backhand index pointing down skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "backhand-index-pointing-down-skin-5",
+    "src": "/sticker/sensa/Backhand index pointing down skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "backhand-index-pointing-down",
+    "src": "/sticker/sensa/Backhand index pointing down.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "backhand-index-pointing-left-skin-1",
+    "src": "/sticker/sensa/Backhand index pointing left skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "backhand-index-pointing-left-skin-2",
+    "src": "/sticker/sensa/Backhand index pointing left skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "backhand-index-pointing-left-skin-3",
+    "src": "/sticker/sensa/Backhand index pointing left skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "backhand-index-pointing-left-skin-4",
+    "src": "/sticker/sensa/Backhand index pointing left skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "backhand-index-pointing-left-skin-5",
+    "src": "/sticker/sensa/Backhand index pointing left skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "backhand-index-pointing-left",
+    "src": "/sticker/sensa/Backhand index pointing left.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "backhand-index-pointing-right-skin-1",
+    "src": "/sticker/sensa/Backhand index pointing right skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "backhand-index-pointing-right-skin-2",
+    "src": "/sticker/sensa/Backhand index pointing right skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "backhand-index-pointing-right-skin-3",
+    "src": "/sticker/sensa/Backhand index pointing right skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "backhand-index-pointing-right-skin-4",
+    "src": "/sticker/sensa/Backhand index pointing right skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "backhand-index-pointing-right-skin-5",
+    "src": "/sticker/sensa/Backhand index pointing right skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "backhand-index-pointing-right",
+    "src": "/sticker/sensa/Backhand index pointing right.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "backhand-index-pointing-up-skin-1",
+    "src": "/sticker/sensa/Backhand index pointing up skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "backhand-index-pointing-up-skin-2",
+    "src": "/sticker/sensa/Backhand index pointing up skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "backhand-index-pointing-up-skin-3",
+    "src": "/sticker/sensa/Backhand index pointing up skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "backhand-index-pointing-up-skin-4",
+    "src": "/sticker/sensa/Backhand index pointing up skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "backhand-index-pointing-up-skin-5",
+    "src": "/sticker/sensa/Backhand index pointing up skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "backhand-index-pointing-up",
+    "src": "/sticker/sensa/Backhand index pointing up.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "baltasar",
+    "src": "/sticker/sensa/Baltasar.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "banana",
+    "src": "/sticker/sensa/Banana.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "beach-with-umbrella",
+    "src": "/sticker/sensa/Beach with umbrella.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "beach",
+    "src": "/sticker/sensa/Beach.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "beaming-face-with-smiling-eyes",
+    "src": "/sticker/sensa/Beaming face with smiling eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "bell",
+    "src": "/sticker/sensa/Bell.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "bicycle",
+    "src": "/sticker/sensa/Bicycle.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "broken-heart",
+    "src": "/sticker/sensa/Broken heart.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "bubbles",
+    "src": "/sticker/sensa/Bubbles.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "calendar",
+    "src": "/sticker/sensa/Calendar.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "call-me-hand-skin-1",
+    "src": "/sticker/sensa/Call me hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "call-me-hand-skin-2",
+    "src": "/sticker/sensa/Call me hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "call-me-hand-skin-4",
+    "src": "/sticker/sensa/Call me hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "call-me-hand-skin-5",
+    "src": "/sticker/sensa/Call me hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "call-me-hand",
+    "src": "/sticker/sensa/Call me hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "camera",
+    "src": "/sticker/sensa/Camera.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "cat",
+    "src": "/sticker/sensa/Cat.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "check-mark",
+    "src": "/sticker/sensa/Check mark.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "clapping-hands-skin-1",
+    "src": "/sticker/sensa/Clapping hands skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "clapping-hands-skin-2",
+    "src": "/sticker/sensa/Clapping hands skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "clapping-hands-skin-3",
+    "src": "/sticker/sensa/Clapping hands skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "clapping-hands-skin-4",
+    "src": "/sticker/sensa/Clapping hands skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "clapping-hands-skin-5",
+    "src": "/sticker/sensa/Clapping hands skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "clapping-hands",
+    "src": "/sticker/sensa/Clapping hands.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "clock",
+    "src": "/sticker/sensa/Clock.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "clown-face",
+    "src": "/sticker/sensa/Clown face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "cold-face",
+    "src": "/sticker/sensa/Cold face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "compass",
+    "src": "/sticker/sensa/Compass.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "confounded-face",
+    "src": "/sticker/sensa/Confounded face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "cool",
+    "src": "/sticker/sensa/Cool.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "cowboy-hat-face",
+    "src": "/sticker/sensa/Cowboy hat face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "crossed-fingers-skin-1",
+    "src": "/sticker/sensa/Crossed fingers skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "crossed-fingers-skin-2",
+    "src": "/sticker/sensa/Crossed fingers skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "crossed-fingers-skin-3",
+    "src": "/sticker/sensa/Crossed fingers skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "crossed-fingers-skin-4",
+    "src": "/sticker/sensa/Crossed fingers skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "crossed-fingers-skin-5",
+    "src": "/sticker/sensa/Crossed fingers skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "crossed-fingers",
+    "src": "/sticker/sensa/Crossed fingers.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "crying-face",
+    "src": "/sticker/sensa/Crying face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "crystal-ball",
+    "src": "/sticker/sensa/Crystal ball.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "dissapointed-face",
+    "src": "/sticker/sensa/Dissapointed face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "dizzy-face",
+    "src": "/sticker/sensa/Dizzy face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "dog",
+    "src": "/sticker/sensa/Dog.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "downcast-face-with-sweat",
+    "src": "/sticker/sensa/Downcast face with sweat.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "drooling-face",
+    "src": "/sticker/sensa/Drooling face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "eggplant",
+    "src": "/sticker/sensa/Eggplant.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "envelope",
+    "src": "/sticker/sensa/Envelope.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "exploding-head",
+    "src": "/sticker/sensa/Exploding head.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "expressioless-face",
+    "src": "/sticker/sensa/Expressioless face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "face-blowing-a-kiss",
+    "src": "/sticker/sensa/Face blowing a kiss.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "face-savoring-food",
+    "src": "/sticker/sensa/Face savoring food.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "face-screaming-in-fear",
+    "src": "/sticker/sensa/Face screaming in fear.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "face-with-hand-over-mouth",
+    "src": "/sticker/sensa/Face with hand over mouth.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "face-with-head-bandage",
+    "src": "/sticker/sensa/Face with head-bandage.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "face-with-medical-mask",
+    "src": "/sticker/sensa/Face with medical mask.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "face-with-monocle",
+    "src": "/sticker/sensa/Face with monocle.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "face-with-open-mouth",
+    "src": "/sticker/sensa/Face with open mouth.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "face-with-raised-eyebrow",
+    "src": "/sticker/sensa/Face with raised eyebrow.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "face-with-rolling-eyes",
+    "src": "/sticker/sensa/Face with rolling eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "face-with-steam-from-nose",
+    "src": "/sticker/sensa/Face with steam from nose.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "face-with-symbols-on-mouth",
+    "src": "/sticker/sensa/Face with symbols on mouth.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "face-with-tears-of-joy",
+    "src": "/sticker/sensa/Face with tears of joy.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "face-with-thermometer",
+    "src": "/sticker/sensa/Face with thermometer.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "face-with-tongue",
+    "src": "/sticker/sensa/Face with tongue.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "face-without-mouth",
+    "src": "/sticker/sensa/Face without mouth.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "fearful-face",
+    "src": "/sticker/sensa/Fearful face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "fire",
+    "src": "/sticker/sensa/Fire.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "flushed-face",
+    "src": "/sticker/sensa/Flushed face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "folded-hands-skin-1",
+    "src": "/sticker/sensa/Folded hands skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "folded-hands-skin-2",
+    "src": "/sticker/sensa/Folded hands skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "folded-hands-skin-3",
+    "src": "/sticker/sensa/Folded hands skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "folded-hands-skin-4",
+    "src": "/sticker/sensa/Folded hands skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "folded-hands-skin-5",
+    "src": "/sticker/sensa/Folded hands skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "folded-hands",
+    "src": "/sticker/sensa/Folded hands.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "free",
+    "src": "/sticker/sensa/Free.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "frowning-face-with-open-mouth",
+    "src": "/sticker/sensa/Frowning face with open mouth.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "frowning-face",
+    "src": "/sticker/sensa/Frowning face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "gaspar",
+    "src": "/sticker/sensa/Gaspar.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "gemstone",
+    "src": "/sticker/sensa/Gemstone.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "glasses",
+    "src": "/sticker/sensa/Glasses.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "green-apple",
+    "src": "/sticker/sensa/Green apple.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "grimacing-face",
+    "src": "/sticker/sensa/Grimacing face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "grinning-face-with-big-eyes",
+    "src": "/sticker/sensa/Grinning face with big eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "grinning-face-with-sweat",
+    "src": "/sticker/sensa/Grinning face with sweat.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "grinning-face-1",
+    "src": "/sticker/sensa/Grinning face-1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "grinning-face",
+    "src": "/sticker/sensa/Grinning face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "grinning-squinting-face",
+    "src": "/sticker/sensa/Grinning squinting face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "group",
+    "src": "/sticker/sensa/Group.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "hamburger",
+    "src": "/sticker/sensa/Hamburger.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "hand-with-fingers-splayed-skin-1",
+    "src": "/sticker/sensa/Hand with fingers splayed skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "hand-with-fingers-splayed-skin-2",
+    "src": "/sticker/sensa/Hand with fingers splayed skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "hand-with-fingers-splayed-skin-3",
+    "src": "/sticker/sensa/Hand with fingers splayed skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "hand-with-fingers-splayed-skin-4",
+    "src": "/sticker/sensa/Hand with fingers splayed skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "hand-with-fingers-splayed-skin-5",
+    "src": "/sticker/sensa/Hand with fingers splayed skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "hand-with-fingers-splayed",
+    "src": "/sticker/sensa/Hand with fingers splayed.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "handshake-skin-1",
+    "src": "/sticker/sensa/Handshake skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "handshake-skin-2",
+    "src": "/sticker/sensa/Handshake skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "handshake-skin-3",
+    "src": "/sticker/sensa/Handshake skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "handshake-skin-4",
+    "src": "/sticker/sensa/Handshake skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "handshake-skin-5",
+    "src": "/sticker/sensa/Handshake skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "handshake",
+    "src": "/sticker/sensa/Handshake.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "heart",
+    "src": "/sticker/sensa/Heart.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "high-voltage",
+    "src": "/sticker/sensa/High voltage.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "hot-face",
+    "src": "/sticker/sensa/Hot face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "house",
+    "src": "/sticker/sensa/House.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "hugging-face",
+    "src": "/sticker/sensa/Hugging face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "hushed-face",
+    "src": "/sticker/sensa/Hushed face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "index-pointing-up-skin-1",
+    "src": "/sticker/sensa/Index pointing up skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "index-pointing-up-skin-2",
+    "src": "/sticker/sensa/Index pointing up skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "index-pointing-up-skin-3",
+    "src": "/sticker/sensa/Index pointing up skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "index-pointing-up-skin-4",
+    "src": "/sticker/sensa/Index pointing up skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "index-pointing-up-skin-5",
+    "src": "/sticker/sensa/Index pointing up skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "index-pointing-up",
+    "src": "/sticker/sensa/Index pointing up.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "joker",
+    "src": "/sticker/sensa/Joker.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "kissing-face-with-closed-eyes",
+    "src": "/sticker/sensa/Kissing face with closed eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "kissing-face-with-smiling-eyes",
+    "src": "/sticker/sensa/Kissing face with smiling eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "kissing-face",
+    "src": "/sticker/sensa/Kissing face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "kiwi",
+    "src": "/sticker/sensa/Kiwi.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "landmark",
+    "src": "/sticker/sensa/Landmark.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "left-facing-fist-skin-1",
+    "src": "/sticker/sensa/Left facing fist skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "left-facing-fist-skin-2",
+    "src": "/sticker/sensa/Left facing fist skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "left-facing-fist-skin-3",
+    "src": "/sticker/sensa/Left facing fist skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "left-facing-fist-skin-4",
+    "src": "/sticker/sensa/Left facing fist skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "left-facing-fist-skin-5",
+    "src": "/sticker/sensa/Left facing fist skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "left-facing-fist",
+    "src": "/sticker/sensa/Left facing fist.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "lion",
+    "src": "/sticker/sensa/Lion.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "loudly-crying-face",
+    "src": "/sticker/sensa/Loudly crying face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "love-you-gesture-skin-1",
+    "src": "/sticker/sensa/Love you gesture skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "love-you-gesture-skin-2",
+    "src": "/sticker/sensa/Love you gesture skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "love-you-gesture-skin-3",
+    "src": "/sticker/sensa/Love you gesture skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "love-you-gesture-skin-4",
+    "src": "/sticker/sensa/Love you gesture skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "love-you-gesture-skin-5",
+    "src": "/sticker/sensa/Love you gesture skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "love-you-gesture",
+    "src": "/sticker/sensa/Love you gesture.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "lying-face",
+    "src": "/sticker/sensa/Lying face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "mailbox",
+    "src": "/sticker/sensa/Mailbox.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "melchor",
+    "src": "/sticker/sensa/Melchor.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "middle-finger-skin-1",
+    "src": "/sticker/sensa/Middle finger skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "middle-finger-skin-2",
+    "src": "/sticker/sensa/Middle finger skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "middle-finger-skin-3",
+    "src": "/sticker/sensa/Middle finger skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "middle-finger-skin-4",
+    "src": "/sticker/sensa/Middle finger skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "middle-finger-skin-5",
+    "src": "/sticker/sensa/Middle finger skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "middle-finger",
+    "src": "/sticker/sensa/Middle finger.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "money-mouth-face-$",
+    "src": "/sticker/sensa/Money mouth face $.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "money-mouth-face-bitcoin",
+    "src": "/sticker/sensa/Money mouth face bitcoin.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "money-mouth-face-짙",
+    "src": "/sticker/sensa/Money mouth face 짙.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "money-mouth-face-짜",
+    "src": "/sticker/sensa/Money mouth face 짜.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "monkey",
+    "src": "/sticker/sensa/Monkey.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "nauseated-face",
+    "src": "/sticker/sensa/Nauseated face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "nerd-face",
+    "src": "/sticker/sensa/Nerd face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "neutral-face",
+    "src": "/sticker/sensa/Neutral face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "ok-hand-skin-1",
+    "src": "/sticker/sensa/Ok hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "ok-hand-skin-2",
+    "src": "/sticker/sensa/Ok hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "ok-hand-skin-3",
+    "src": "/sticker/sensa/Ok hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "ok-hand-skin-4",
+    "src": "/sticker/sensa/Ok hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "ok-hand-skin-5",
+    "src": "/sticker/sensa/Ok hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "ok-hand",
+    "src": "/sticker/sensa/Ok hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "ok",
+    "src": "/sticker/sensa/Ok.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "oncoming-fist-skin-1",
+    "src": "/sticker/sensa/Oncoming fist skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "oncoming-fist-skin-2",
+    "src": "/sticker/sensa/Oncoming fist skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "oncoming-fist-skin-3",
+    "src": "/sticker/sensa/Oncoming fist skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "oncoming-fist-skin-4",
+    "src": "/sticker/sensa/Oncoming fist skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "oncoming-fist-skin-5",
+    "src": "/sticker/sensa/Oncoming fist skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "oncoming-fist",
+    "src": "/sticker/sensa/Oncoming fist.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "open-hands-skin-1",
+    "src": "/sticker/sensa/Open hands skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "open-hands-skin-2",
+    "src": "/sticker/sensa/Open hands skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "open-hands-skin-3",
+    "src": "/sticker/sensa/Open hands skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "open-hands-skin-4",
+    "src": "/sticker/sensa/Open hands skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "open-hands-skin-5",
+    "src": "/sticker/sensa/Open hands skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "open-hands",
+    "src": "/sticker/sensa/Open hands.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "palm",
+    "src": "/sticker/sensa/Palm.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "palms-up-together-skin-1",
+    "src": "/sticker/sensa/Palms up together skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "palms-up-together-skin-2",
+    "src": "/sticker/sensa/Palms up together skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "palms-up-together-skin-3",
+    "src": "/sticker/sensa/Palms up together skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "palms-up-together-skin-4",
+    "src": "/sticker/sensa/Palms up together skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "palms-up-together-skin-5",
+    "src": "/sticker/sensa/Palms up together skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "palms-up-together",
+    "src": "/sticker/sensa/Palms up together.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "panda",
+    "src": "/sticker/sensa/Panda.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "party-popper",
+    "src": "/sticker/sensa/Party popper.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "partying-face",
+    "src": "/sticker/sensa/Partying face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "peach",
+    "src": "/sticker/sensa/Peach.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "pencil",
+    "src": "/sticker/sensa/Pencil.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "pensive-face",
+    "src": "/sticker/sensa/Pensive face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "pile-of-poo",
+    "src": "/sticker/sensa/Pile of poo.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "pinch-hand-skin-1",
+    "src": "/sticker/sensa/Pinch hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "pinch-hand-skin-2",
+    "src": "/sticker/sensa/Pinch hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "pinch-hand-skin-3",
+    "src": "/sticker/sensa/Pinch hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "pinch-hand-skin-4",
+    "src": "/sticker/sensa/Pinch hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "pinch-hand-skin-5",
+    "src": "/sticker/sensa/Pinch hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "pinch-hand",
+    "src": "/sticker/sensa/Pinch hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "pinched-fingers-skin-1",
+    "src": "/sticker/sensa/Pinched fingers skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "pinched-fingers-skin-2",
+    "src": "/sticker/sensa/Pinched fingers skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "pinched-fingers-skin-3",
+    "src": "/sticker/sensa/Pinched fingers skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "pinched-fingers-skin-4",
+    "src": "/sticker/sensa/Pinched fingers skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "pinched-fingers-skin-5",
+    "src": "/sticker/sensa/Pinched fingers skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "pinched-fingers",
+    "src": "/sticker/sensa/Pinched fingers.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "pizza",
+    "src": "/sticker/sensa/Pizza.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "pleading-face",
+    "src": "/sticker/sensa/Pleading face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "pouting-face",
+    "src": "/sticker/sensa/Pouting face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "rainbow",
+    "src": "/sticker/sensa/Rainbow.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "raised-back-of-hand-skin-1",
+    "src": "/sticker/sensa/Raised back of hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "raised-back-of-hand-skin-2",
+    "src": "/sticker/sensa/Raised back of hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "raised-back-of-hand-skin-3",
+    "src": "/sticker/sensa/Raised back of hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "raised-back-of-hand-skin-4",
+    "src": "/sticker/sensa/Raised back of hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "raised-back-of-hand-skin-5",
+    "src": "/sticker/sensa/Raised back of hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "raised-back-of-hand",
+    "src": "/sticker/sensa/Raised back of hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "raised-fist-skin-1",
+    "src": "/sticker/sensa/Raised fist skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "raised-fist-skin-2",
+    "src": "/sticker/sensa/Raised fist skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "raised-fist-skin-3",
+    "src": "/sticker/sensa/Raised fist skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "raised-fist-skin-4",
+    "src": "/sticker/sensa/Raised fist skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "raised-fist-skin-5",
+    "src": "/sticker/sensa/Raised fist skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "raised-fist",
+    "src": "/sticker/sensa/Raised fist.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "raised-hand-skin-1",
+    "src": "/sticker/sensa/Raised hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "raised-hand-skin-2",
+    "src": "/sticker/sensa/Raised hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "raised-hand-skin-3",
+    "src": "/sticker/sensa/Raised hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "raised-hand-skin-4",
+    "src": "/sticker/sensa/Raised hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "raised-hand-skin-5",
+    "src": "/sticker/sensa/Raised hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "raised-hand",
+    "src": "/sticker/sensa/Raised hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "raising-hands-skin-1",
+    "src": "/sticker/sensa/Raising hands skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "raising-hands-skin-2",
+    "src": "/sticker/sensa/Raising hands skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "raising-hands-skin-3",
+    "src": "/sticker/sensa/Raising hands skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "raising-hands-skin-4",
+    "src": "/sticker/sensa/Raising hands skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "raising-hands-skin-5",
+    "src": "/sticker/sensa/Raising hands skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "raising-hands",
+    "src": "/sticker/sensa/Raising hands.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "recycling-symbol",
+    "src": "/sticker/sensa/Recycling symbol.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "red-apple",
+    "src": "/sticker/sensa/Red apple.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "relieved-face",
+    "src": "/sticker/sensa/Relieved face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "right-facing-fist-skin-1",
+    "src": "/sticker/sensa/Right facing fist skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "right-facing-fist-skin-2",
+    "src": "/sticker/sensa/Right facing fist skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "right-facing-fist-skin-3",
+    "src": "/sticker/sensa/Right facing fist skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "right-facing-fist-skin-4",
+    "src": "/sticker/sensa/Right facing fist skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "right-facing-fist-skin-5",
+    "src": "/sticker/sensa/Right facing fist skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "right-facing-fist",
+    "src": "/sticker/sensa/Right facing fist.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "robot",
+    "src": "/sticker/sensa/Robot.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "rocket",
+    "src": "/sticker/sensa/Rocket.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "rolling-on-the-floor-laughing",
+    "src": "/sticker/sensa/Rolling on the floor laughing.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "round-pushpin",
+    "src": "/sticker/sensa/Round pushpin.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "sad-but-relieved-face",
+    "src": "/sticker/sensa/Sad but relieved face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "santa-claus",
+    "src": "/sticker/sensa/Santa Claus.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "scrunched-face",
+    "src": "/sticker/sensa/Scrunched face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "shushing-face",
+    "src": "/sticker/sensa/Shushing face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "sign-of-the-horns-skin-1",
+    "src": "/sticker/sensa/Sign of the horns skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "sign-of-the-horns-skin-2",
+    "src": "/sticker/sensa/Sign of the horns skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "sign-of-the-horns-skin-3",
+    "src": "/sticker/sensa/Sign of the horns skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "sign-of-the-horns-skin-4",
+    "src": "/sticker/sensa/Sign of the horns skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "sign-of-the-horns-skin-5",
+    "src": "/sticker/sensa/Sign of the horns skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "sign-of-the-horns",
+    "src": "/sticker/sensa/Sign of the horns.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "sleep-face",
+    "src": "/sticker/sensa/Sleep face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "sleepy-face",
+    "src": "/sticker/sensa/Sleepy face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "slightly-frowning-face",
+    "src": "/sticker/sensa/Slightly frowning face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "slightly-smiling-face",
+    "src": "/sticker/sensa/Slightly smiling face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "smiling-face-with-halo",
+    "src": "/sticker/sensa/Smiling face with halo.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "smiling-face-with-heart-eyes",
+    "src": "/sticker/sensa/Smiling face with heart-eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "smiling-face-with-hearts",
+    "src": "/sticker/sensa/Smiling face with hearts.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "smiling-face-with-smiling-eyes",
+    "src": "/sticker/sensa/Smiling face with smiling eyes.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "smiling-face-with-sunglasses",
+    "src": "/sticker/sensa/Smiling face with sunglasses.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "smiling-face",
+    "src": "/sticker/sensa/Smiling face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "smirking-face",
+    "src": "/sticker/sensa/Smirking face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "sneezing-face",
+    "src": "/sticker/sensa/Sneezing face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "sparkles",
+    "src": "/sticker/sensa/Sparkles.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "squinting-face-with-tongue",
+    "src": "/sticker/sensa/Squinting face with tongue.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "star-struck",
+    "src": "/sticker/sensa/Star-struck.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "star",
+    "src": "/sticker/sensa/Star.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "sweat-droplets",
+    "src": "/sticker/sensa/Sweat droplets.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "thinking-face",
+    "src": "/sticker/sensa/Thinking face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "thumbs-down-skin-1",
+    "src": "/sticker/sensa/Thumbs down skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "thumbs-down-skin-2",
+    "src": "/sticker/sensa/Thumbs down skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "thumbs-down-skin-3",
+    "src": "/sticker/sensa/Thumbs down skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "thumbs-down-skin-4",
+    "src": "/sticker/sensa/Thumbs down skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "thumbs-down-skin-5",
+    "src": "/sticker/sensa/Thumbs down skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "thumbs-down",
+    "src": "/sticker/sensa/Thumbs down.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "thumbs-up-skin-1",
+    "src": "/sticker/sensa/Thumbs up skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "thumbs-up-skin-2",
+    "src": "/sticker/sensa/Thumbs up skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "thumbs-up-skin-3",
+    "src": "/sticker/sensa/Thumbs up skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "thumbs-up-skin-4",
+    "src": "/sticker/sensa/Thumbs up skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "thumbs-up-skin-5",
+    "src": "/sticker/sensa/Thumbs up skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "thumbs-up",
+    "src": "/sticker/sensa/Thumbs up.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "tired-face",
+    "src": "/sticker/sensa/Tired face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "umbrella-with-rain-drops",
+    "src": "/sticker/sensa/Umbrella with rain drops.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "unamused-face",
+    "src": "/sticker/sensa/Unamused face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "unicorn",
+    "src": "/sticker/sensa/Unicorn.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "upside-down-face",
+    "src": "/sticker/sensa/Upside-down face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "victory-hand-skin-1",
+    "src": "/sticker/sensa/Victory hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "victory-hand-skin-2",
+    "src": "/sticker/sensa/Victory hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "victory-hand-skin-3",
+    "src": "/sticker/sensa/Victory hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "victory-hand-skin-4",
+    "src": "/sticker/sensa/Victory hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "victory-hand-skin-5",
+    "src": "/sticker/sensa/Victory hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "victory-hand",
+    "src": "/sticker/sensa/Victory hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "vomiting-face",
+    "src": "/sticker/sensa/Vomiting face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "vulcan-salute-skin-1",
+    "src": "/sticker/sensa/Vulcan salute skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "vulcan-salute-skin-2",
+    "src": "/sticker/sensa/Vulcan salute skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "vulcan-salute-skin-3",
+    "src": "/sticker/sensa/Vulcan salute skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "vulcan-salute-skin-4",
+    "src": "/sticker/sensa/Vulcan salute skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "vulcan-salute-skin-5",
+    "src": "/sticker/sensa/Vulcan salute skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "vulcan-salute",
+    "src": "/sticker/sensa/Vulcan salute.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "waving-hand-skin-1",
+    "src": "/sticker/sensa/Waving hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "waving-hand-skin-2",
+    "src": "/sticker/sensa/Waving hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "waving-hand-skin-3",
+    "src": "/sticker/sensa/Waving hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "waving-hand-skin-4",
+    "src": "/sticker/sensa/Waving hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "waving-hand-skin-5",
+    "src": "/sticker/sensa/Waving hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "waving-hand",
+    "src": "/sticker/sensa/Waving hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "weary-face",
+    "src": "/sticker/sensa/Weary face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "weather",
+    "src": "/sticker/sensa/Weather.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "winking-face-with-tongue",
+    "src": "/sticker/sensa/Winking face with tongue.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "winking-face",
+    "src": "/sticker/sensa/Winking face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "woozy-face",
+    "src": "/sticker/sensa/Woozy face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "worried-face-1",
+    "src": "/sticker/sensa/Worried face-1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "worried-face",
+    "src": "/sticker/sensa/Worried face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "writing-hand-skin-1",
+    "src": "/sticker/sensa/Writing hand skin 1.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -3
+  },
+  {
+    "id": "writing-hand-skin-2",
+    "src": "/sticker/sensa/Writing hand skin 2.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "writing-hand-skin-3",
+    "src": "/sticker/sensa/Writing hand skin 3.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "writing-hand-skin-4",
+    "src": "/sticker/sensa/Writing hand skin 4.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 0
+  },
+  {
+    "id": "writing-hand-skin-5",
+    "src": "/sticker/sensa/Writing hand skin 5.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "writing-hand",
+    "src": "/sticker/sensa/Writing hand.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  },
+  {
+    "id": "xmas-ball",
+    "src": "/sticker/sensa/Xmas ball.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 3
+  },
+  {
+    "id": "xmas-tree",
+    "src": "/sticker/sensa/Xmas tree.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -2
+  },
+  {
+    "id": "yawning-face",
+    "src": "/sticker/sensa/Yawning face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 1
+  },
+  {
+    "id": "zany-face",
+    "src": "/sticker/sensa/Zany face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": -1
+  },
+  {
+    "id": "zipper-mouth-face",
+    "src": "/sticker/sensa/Zipper-mouth face.png",
+    "defaultScale": 0.8,
+    "defaultRotation": 2
+  }
+]
