@@ -10,6 +10,8 @@ export interface Database {
   public: {
     Tables: {
       // Main entries table for photos and praise text
+      // Columns: id, user_id, entry_date, praise, photo_path, is_liked, created_at
+      // Optional column (requires migration 00004): sticker_state
       entries: {
         Row: {
           id: number
@@ -17,6 +19,8 @@ export interface Database {
           entry_date: string // YYYY-MM-DD format
           praise: string | null
           photo_path: string | null // Storage path, not URL
+          is_liked: boolean
+          sticker_state?: Json // Requires migration 00004_add_sticker_state.sql
           created_at: string
         }
         Insert: {
@@ -25,6 +29,8 @@ export interface Database {
           entry_date: string
           praise?: string | null
           photo_path?: string | null
+          is_liked?: boolean
+          sticker_state?: Json
           created_at?: string
         }
         Update: {
@@ -33,6 +39,8 @@ export interface Database {
           entry_date?: string
           praise?: string | null
           photo_path?: string | null
+          is_liked?: boolean
+          sticker_state?: Json
           created_at?: string
         }
       }

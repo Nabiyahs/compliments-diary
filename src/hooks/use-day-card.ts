@@ -112,9 +112,11 @@ export function useDayCard(date: string) {
       if (DEBUG) console.log('[useDayCard] Authenticated user:', userId)
 
       // Query from 'entries' table with explicit user_id filter for reliability
+      // Note: sticker_state column requires migration 00004_add_sticker_state.sql
+      // If not applied, we query without it and stickers won't persist
       const { data, error: fetchError } = await supabase
         .from('entries')
-        .select('id, user_id, entry_date, praise, photo_path, is_liked, sticker_state, created_at')
+        .select('id, user_id, entry_date, praise, photo_path, is_liked, created_at')
         .eq('user_id', userId)
         .eq('entry_date', date)
         .maybeSingle()
@@ -243,12 +245,13 @@ export function useDayCard(date: string) {
 
     // Build the payload OUTSIDE try block for debugging
     // updates.caption is the new value, dayCard?.praise is the existing value
+    // Note: sticker_state column requires migration 00004_add_sticker_state.sql
+    // If not applied, stickers won't persist but the app will still work
     const payload: {
       user_id: string
       entry_date: string
       photo_path: string
       praise: string
-      sticker_state?: StickerState[]
     } = {
       user_id: user.id,
       entry_date: date,
@@ -258,9 +261,9 @@ export function useDayCard(date: string) {
         : (dayCard?.praise || ''),
     }
 
-    // Include sticker_state if provided
-    if (updates.sticker_state !== undefined) {
-      payload.sticker_state = updates.sticker_state
+    // Log sticker_state for debugging (not saved until migration 00004 is applied)
+    if (updates.sticker_state !== undefined && DEBUG) {
+      console.log('[useDayCard] Sticker state provided but column may not exist:', updates.sticker_state.length, 'stickers')
     }
 
     console.log('[useDayCard] ═══════════════════════════════════════')
@@ -289,9 +292,10 @@ export function useDayCard(date: string) {
 
       // Now try to fetch the saved data separately (non-critical)
       // Using .maybeSingle() to avoid errors when RLS SELECT policy has issues
+      // Note: sticker_state column requires migration 00004_add_sticker_state.sql
       const { data: fetchedData, error: fetchError } = await supabase
         .from('entries')
-        .select('id, user_id, entry_date, praise, photo_path, is_liked, sticker_state, created_at')
+        .select('id, user_id, entry_date, praise, photo_path, is_liked, created_at')
         .eq('user_id', user.id)
         .eq('entry_date', date)
         .maybeSingle()
