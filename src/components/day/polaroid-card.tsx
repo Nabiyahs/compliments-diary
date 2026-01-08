@@ -304,14 +304,14 @@ export function PolaroidCard({
               <img
                 src={displayPhotoUrl}
                 alt="Day photo"
-                className="w-full h-[280px] object-cover"
+                className="w-full h-[280px] object-cover relative z-0"
               />
               {/* Change photo button - only clickable in edit mode */}
               <button
                 onClick={handleCameraClick}
                 disabled={uploading || !isEditing}
                 className={cn(
-                  'absolute bottom-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow transition-colors',
+                  'absolute bottom-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow transition-colors z-20',
                   isEditing ? 'hover:bg-white cursor-pointer' : 'opacity-50 cursor-not-allowed'
                 )}
               >
@@ -343,7 +343,7 @@ export function PolaroidCard({
 
           {/* Upload error message */}
           {uploadError && (
-            <div className="absolute bottom-3 left-3 right-3 bg-red-500/90 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+            <div className="absolute bottom-3 left-3 right-3 bg-red-500/90 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-2 z-30">
               <AppIcon name="alert-circle" className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{uploadError}</span>
             </div>
@@ -351,7 +351,7 @@ export function PolaroidCard({
 
           {/* Save error message */}
           {saveError && !uploadError && (
-            <div className="absolute bottom-3 left-3 right-3 bg-red-500/90 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-2">
+            <div className="absolute bottom-3 left-3 right-3 bg-red-500/90 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-2 z-30">
               <AppIcon name="alert-circle" className="w-4 h-4 flex-shrink-0" />
               <span className="truncate">{saveError}</span>
             </div>
@@ -374,7 +374,7 @@ export function PolaroidCard({
                   left: `${sticker.x * 100}%`,
                   top: `${sticker.y * 100}%`,
                   transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotate}deg)`,
-                  zIndex: isSelected ? 100 : sticker.z,
+                  zIndex: isSelected ? 50 : 10 + sticker.z,
                 }}
                 onClick={(e) => handleStickerClick(index, e)}
               >
@@ -444,7 +444,7 @@ export function PolaroidCard({
                 if (!currentSticker) return
 
                 // Calculate new scale with limits
-                const newScale = Math.max(0.3, Math.min(2.0, currentSticker.scale * scale[0]))
+                const newScale = Math.max(0.4, Math.min(2.0, currentSticker.scale * scale[0]))
 
                 // Apply transform directly for smooth visual feedback
                 target.style.transform = `translate(-50%, -50%) scale(${newScale}) rotate(${currentSticker.rotate}deg)`
@@ -457,7 +457,7 @@ export function PolaroidCard({
                 const transform = target.style.transform
                 const scaleMatch = transform.match(/scale\(([^)]+)\)/)
                 if (scaleMatch) {
-                  const newScale = Math.max(0.3, Math.min(2.0, parseFloat(scaleMatch[1])))
+                  const newScale = Math.max(0.4, Math.min(2.0, parseFloat(scaleMatch[1])))
                   updateStickerTransform(selectedStickerIndex, { scale: newScale })
                 }
               }}
