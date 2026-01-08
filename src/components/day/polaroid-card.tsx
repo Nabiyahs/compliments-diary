@@ -66,10 +66,11 @@ export function PolaroidCard({
   const photoAreaRef = useRef<HTMLDivElement>(null)
   const stickerRefs = useRef<(HTMLDivElement | null)[]>([])
 
-  // Sync local stickers with dayCard when it changes (e.g., date navigation, server refresh)
+  // Sync local stickers with dayCard only when navigating to a different day
+  // NOT when sticker_state changes (that would cause race condition with optimistic updates)
   useEffect(() => {
     setLocalStickers(dayCard?.sticker_state || [])
-  }, [dayCard?.sticker_state])
+  }, [dayCard?.entry_date])
 
   // Use local stickers for rendering (optimistic updates)
   const stickers = localStickers
@@ -393,7 +394,8 @@ export function PolaroidCard({
                   <img
                     src={sticker.emoji}
                     alt="sticker"
-                    className="w-16 h-16 object-contain pointer-events-none"
+                    className="w-20 h-20 object-contain pointer-events-none"
+                    style={{ imageRendering: 'auto' }}
                     draggable={false}
                   />
                 ) : (
