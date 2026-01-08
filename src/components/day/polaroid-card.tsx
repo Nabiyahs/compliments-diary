@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { startOfDay } from 'date-fns'
+import Moveable from 'react-moveable'
 import { AppIcon } from '@/components/ui/app-icon'
 import { cn, parseDateString } from '@/lib/utils'
 import { uploadPhoto } from '@/lib/image-upload'
@@ -59,10 +60,19 @@ export function PolaroidCard({
 
   // UI state
   const [playStampAnimation, setPlayStampAnimation] = useState(false)
+  const [selectedStickerIndex, setSelectedStickerIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoAreaRef = useRef<HTMLDivElement>(null)
+  const stickerRefs = useRef<(HTMLDivElement | null)[]>([])
 
   const stickers = dayCard?.sticker_state || []
+
+  // Clear selection when exiting edit mode
+  useEffect(() => {
+    if (!isEditing) {
+      setSelectedStickerIndex(null)
+    }
+  }, [isEditing])
 
   // Show stamp if entry has a photo (saved entry) AND not in edit mode
   // Stamp hides when editing, reappears with animation on save success
@@ -246,50 +256,35 @@ export function PolaroidCard({
     await onStickersChange([...stickers, newSticker])
   }
 
-  const handleStickerDrag = useCallback(
-    (index: number, e: React.MouseEvent | React.TouchEvent) => {
-      const photoArea = photoAreaRef.current
-      if (!photoArea) return
+  const deleteSticker = async (index: number) => {
+    const newStickers = stickers.filter((_, i) => i !== index)
+    setSelectedStickerIndex(null)
+    await onStickersChange(newStickers)
+  }
 
-      e.preventDefault()
-      const rect = photoArea.getBoundingClientRect()
+  const handleStickerClick = (index: number, e: React.MouseEvent) => {
+    if (!isEditing) return
+    e.stopPropagation()
+    setSelectedStickerIndex(index)
+  }
 
-      const getCoords = (event: MouseEvent | TouchEvent) => {
-        if ('touches' in event) {
-          return { clientX: event.touches[0].clientX, clientY: event.touches[0].clientY }
-        }
-        return { clientX: event.clientX, clientY: event.clientY }
-      }
+  const handlePhotoAreaClick = (e: React.MouseEvent) => {
+    // Deselect if clicking on the photo area background (not on a sticker)
+    if (e.target === e.currentTarget || (e.target as HTMLElement).tagName === 'IMG') {
+      setSelectedStickerIndex(null)
+    }
+  }
 
-      const handleMove = async (moveEvent: MouseEvent | TouchEvent) => {
-        const { clientX, clientY } = getCoords(moveEvent)
-        const x = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
-        const y = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
-        const newStickers = stickers.map((s, i) =>
-          i === index ? { ...s, x, y } : s
-        )
-        await onStickersChange(newStickers)
-      }
-
-      const handleUp = () => {
-        document.removeEventListener('mousemove', handleMove)
-        document.removeEventListener('mouseup', handleUp)
-        document.removeEventListener('touchmove', handleMove)
-        document.removeEventListener('touchend', handleUp)
-      }
-
-      document.addEventListener('mousemove', handleMove)
-      document.addEventListener('mouseup', handleUp)
-      document.addEventListener('touchmove', handleMove)
-      document.addEventListener('touchend', handleUp)
+  // Update sticker transform from Moveable
+  const updateStickerTransform = useCallback(
+    (index: number, updates: Partial<StickerState>) => {
+      const newStickers = stickers.map((s, i) =>
+        i === index ? { ...s, ...updates } : s
+      )
+      onStickersChange(newStickers)
     },
     [stickers, onStickersChange]
   )
-
-  const deleteSticker = async (index: number) => {
-    const newStickers = stickers.filter((_, i) => i !== index)
-    await onStickersChange(newStickers)
-  }
 
   return (
     <div className="w-full max-w-[340px] mx-auto relative">
@@ -302,6 +297,7 @@ export function PolaroidCard({
         <div
           ref={photoAreaRef}
           className="bg-gray-100 rounded-xl overflow-hidden mb-3 relative"
+          onClick={handlePhotoAreaClick}
         >
           {displayPhotoUrl ? (
             <>
@@ -364,19 +360,23 @@ export function PolaroidCard({
           {/* Stickers overlay - positioned absolutely within photo area */}
           {stickers.map((sticker, index) => {
             const isSvgSticker = sticker.emoji.startsWith('/')
+            const isSelected = isEditing && selectedStickerIndex === index
             return (
               <div
                 key={index}
-                className="absolute select-none drop-shadow-md"
+                ref={(el) => { stickerRefs.current[index] = el }}
+                className={cn(
+                  'absolute select-none drop-shadow-md',
+                  isEditing && 'cursor-pointer',
+                  isSelected && 'ring-2 ring-blue-400 ring-offset-1 rounded-lg'
+                )}
                 style={{
                   left: `${sticker.x * 100}%`,
                   top: `${sticker.y * 100}%`,
                   transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotate}deg)`,
-                  zIndex: sticker.z,
+                  zIndex: isSelected ? 100 : sticker.z,
                 }}
-                onMouseDown={(e) => handleStickerDrag(index, e)}
-                onTouchStart={(e) => handleStickerDrag(index, e)}
-                onDoubleClick={() => deleteSticker(index)}
+                onClick={(e) => handleStickerClick(index, e)}
               >
                 {isSvgSticker ? (
                   <img
@@ -386,11 +386,99 @@ export function PolaroidCard({
                     draggable={false}
                   />
                 ) : (
-                  <span className="text-3xl cursor-move">{sticker.emoji}</span>
+                  <span className="text-3xl">{sticker.emoji}</span>
+                )}
+                {/* Delete button - only shown for selected sticker in edit mode */}
+                {isSelected && (
+                  <button
+                    className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md z-10"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteSticker(index)
+                    }}
+                    aria-label="Delete sticker"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 )}
               </div>
             )
           })}
+
+          {/* Moveable for selected sticker */}
+          {isEditing && selectedStickerIndex !== null && stickerRefs.current[selectedStickerIndex] && (
+            <Moveable
+              target={stickerRefs.current[selectedStickerIndex]}
+              container={photoAreaRef.current}
+              draggable={true}
+              scalable={true}
+              rotatable={true}
+              keepRatio={true}
+              throttleDrag={0}
+              throttleScale={0}
+              throttleRotate={0}
+              renderDirections={["nw", "ne", "sw", "se"]}
+              rotationPosition="top"
+              origin={false}
+              padding={{ left: 0, top: 0, right: 0, bottom: 0 }}
+              onDrag={({ target, left, top }) => {
+                const photoArea = photoAreaRef.current
+                if (!photoArea) return
+                const rect = photoArea.getBoundingClientRect()
+                const stickerRect = target.getBoundingClientRect()
+
+                // Calculate center position as normalized coordinates
+                const centerX = (left + stickerRect.width / 2) / rect.width
+                const centerY = (top + stickerRect.height / 2) / rect.height
+
+                // Clamp within bounds
+                const x = Math.max(0.1, Math.min(0.9, centerX))
+                const y = Math.max(0.1, Math.min(0.9, centerY))
+
+                updateStickerTransform(selectedStickerIndex, { x, y })
+              }}
+              onScale={({ target, scale, drag }) => {
+                const currentSticker = stickers[selectedStickerIndex]
+                if (!currentSticker) return
+
+                // Calculate new scale with limits
+                const newScale = Math.max(0.3, Math.min(2.0, currentSticker.scale * scale[0]))
+
+                // Apply transform directly for smooth visual feedback
+                target.style.transform = `translate(-50%, -50%) scale(${newScale}) rotate(${currentSticker.rotate}deg)`
+              }}
+              onScaleEnd={({ target }) => {
+                const currentSticker = stickers[selectedStickerIndex]
+                if (!currentSticker) return
+
+                // Parse the final scale from transform
+                const transform = target.style.transform
+                const scaleMatch = transform.match(/scale\(([^)]+)\)/)
+                if (scaleMatch) {
+                  const newScale = Math.max(0.3, Math.min(2.0, parseFloat(scaleMatch[1])))
+                  updateStickerTransform(selectedStickerIndex, { scale: newScale })
+                }
+              }}
+              onRotate={({ target, rotate }) => {
+                const currentSticker = stickers[selectedStickerIndex]
+                if (!currentSticker) return
+
+                // Apply transform directly for smooth visual feedback
+                target.style.transform = `translate(-50%, -50%) scale(${currentSticker.scale}) rotate(${rotate}deg)`
+              }}
+              onRotateEnd={({ target }) => {
+                // Parse the final rotation from transform
+                const transform = target.style.transform
+                const rotateMatch = transform.match(/rotate\(([^)]+)deg\)/)
+                if (rotateMatch) {
+                  const rotate = parseFloat(rotateMatch[1])
+                  updateStickerTransform(selectedStickerIndex, { rotate })
+                }
+              }}
+            />
+          )}
 
           <input
             ref={fileInputRef}
