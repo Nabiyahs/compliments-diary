@@ -6,6 +6,7 @@ import { AppIcon } from '@/components/ui/app-icon'
 import { cn, parseDateString } from '@/lib/utils'
 import { uploadPhoto } from '@/lib/image-upload'
 import { StampOverlay } from './stamp-overlay'
+import { StickerBottomSheet, type CatalogSticker } from './sticker-bottom-sheet'
 import type { DayCard, StickerState } from '@/types/database'
 
 const DEBUG = process.env.NODE_ENV === 'development'
@@ -21,8 +22,6 @@ interface PolaroidCardProps {
   saveError?: string | null
   onEditingChange?: (editing: boolean) => void
 }
-
-const EMOJI_PALETTE = ['☕', '✨', '💛', '⭐', '🌟', '💖', '🎉', '🌸', '🍀', '🔥', '💪', '🧘‍♀️', '🥗', '💚', '😊', '🥰']
 
 const PLACEHOLDER_TEXT = "Give your day a pat."
 
@@ -59,7 +58,6 @@ export function PolaroidCard({
   const [uploadError, setUploadError] = useState<string | null>(null)
 
   // UI state
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [playStampAnimation, setPlayStampAnimation] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoAreaRef = useRef<HTMLDivElement>(null)
@@ -236,17 +234,16 @@ export function PolaroidCard({
     fileInputRef.current?.click()
   }
 
-  const addSticker = async (emoji: string) => {
+  const addSticker = async (catalogSticker: CatalogSticker) => {
     const newSticker: StickerState = {
-      emoji,
-      x: 0.85 + (stickers.length * 0.05),
-      y: 0.08,
-      scale: 1,
-      rotate: 0,
+      emoji: catalogSticker.src, // Store SVG path in emoji field
+      x: 0.5, // Center horizontally
+      y: 0.4, // Slightly above center
+      scale: catalogSticker.defaultScale,
+      rotate: catalogSticker.defaultRotation,
       z: stickers.length + 1,
     }
     await onStickersChange([...stickers, newSticker])
-    setShowEmojiPicker(false)
   }
 
   const handleStickerDrag = useCallback(
@@ -364,25 +361,36 @@ export function PolaroidCard({
             </div>
           )}
 
-          {/* Stickers overlay - matches reference: absolute top-3 right-3 flex gap-2 text-3xl */}
-          {stickers.length > 0 && (
-            <div className="absolute top-3 right-3 flex gap-2">
-              {stickers.map((sticker, index) => (
-                <span
-                  key={index}
-                  className="text-3xl cursor-move select-none drop-shadow-sm"
-                  style={{
-                    transform: `scale(${sticker.scale}) rotate(${sticker.rotate}deg)`,
-                  }}
-                  onMouseDown={(e) => handleStickerDrag(index, e)}
-                  onTouchStart={(e) => handleStickerDrag(index, e)}
-                  onDoubleClick={() => deleteSticker(index)}
-                >
-                  {sticker.emoji}
-                </span>
-              ))}
-            </div>
-          )}
+          {/* Stickers overlay - positioned absolutely within photo area */}
+          {stickers.map((sticker, index) => {
+            const isSvgSticker = sticker.emoji.startsWith('/')
+            return (
+              <div
+                key={index}
+                className="absolute select-none drop-shadow-md"
+                style={{
+                  left: `${sticker.x * 100}%`,
+                  top: `${sticker.y * 100}%`,
+                  transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotate}deg)`,
+                  zIndex: sticker.z,
+                }}
+                onMouseDown={(e) => handleStickerDrag(index, e)}
+                onTouchStart={(e) => handleStickerDrag(index, e)}
+                onDoubleClick={() => deleteSticker(index)}
+              >
+                {isSvgSticker ? (
+                  <img
+                    src={sticker.emoji}
+                    alt="sticker"
+                    className="w-16 h-16 object-contain pointer-events-none"
+                    draggable={false}
+                  />
+                ) : (
+                  <span className="text-3xl cursor-move">{sticker.emoji}</span>
+                )}
+              </div>
+            )
+          })}
 
           <input
             ref={fileInputRef}
@@ -490,22 +498,9 @@ export function PolaroidCard({
         />
       </div>
 
-      {/* Emoji picker popup */}
-      {showEmojiPicker && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 mb-4">
-          <p className="text-xs text-gray-500 mb-3">Add sticker (double-click to remove)</p>
-          <div className="grid grid-cols-8 gap-2">
-            {EMOJI_PALETTE.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => addSticker(emoji)}
-                className="w-9 h-9 flex items-center justify-center text-xl hover:bg-pink-50 rounded-lg transition-colors"
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Sticker picker bottom sheet - visible in edit mode */}
+      {isEditing && (
+        <StickerBottomSheet onStickerSelect={addSticker} />
       )}
     </div>
   )
