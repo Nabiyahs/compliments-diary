@@ -11,7 +11,7 @@ export interface MonthDayData {
   thumbUrl: string | null // Signed URL for display
   hasStamp: boolean
   caption: string | null
-  stickers: string[]
+  // Note: stickers are NOT loaded in month view - they only render in Day View
 }
 
 export function useMonthData(year: number, month: number) {
@@ -60,7 +60,6 @@ export function useMonthData(year: number, month: number) {
             thumbUrl,
             hasStamp: false, // Not used in entries table
             caption: entry.praise, // Map praise to caption for UI compatibility
-            stickers: [], // Not used in entries table
           })
         }
       }

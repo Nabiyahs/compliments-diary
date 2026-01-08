@@ -142,14 +142,21 @@ export interface Database {
   }
 }
 
-// Sticker state for emoji stickers on polaroid
+// Sticker placement on polaroid photo
+// Stored in sticker_state JSONB column as { stickers: StickerState[] }
 export interface StickerState {
-  emoji: string
-  x: number // normalized 0..1
-  y: number // normalized 0..1
-  scale: number
-  rotate: number
-  z: number
+  id: string            // Unique identifier (uuid or timestamp)
+  src: string           // Path to sticker image (e.g., "/sticker/sensa/xxx.png")
+  x: number             // Horizontal position (normalized 0..1)
+  y: number             // Vertical position (normalized 0..1)
+  scale: number         // Size multiplier
+  rotation: number      // Rotation in degrees
+}
+
+// The shape of sticker_state JSONB column in database
+// This is the SINGLE source of truth for sticker data
+export interface StickerStateWrapper {
+  stickers: StickerState[]
 }
 
 // Aggregated month data for efficient loading
