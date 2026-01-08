@@ -3,9 +3,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { cn } from '@/lib/utils'
 
-// Animation timing constants (must match globals.css)
+// Animation timing constants (must match globals.css keyframes)
 const ANIMATION_DURATION = 420 // Total animation duration in ms
-const IMPACT_TIMING = 230 // When impact happens (55% of 420ms)
+const IMPACT_TIMING = 252 // When impact squash happens (60% of 420ms)
+
+// Cache-busting version for seal image (update when image file changes)
+const SEAL_IMAGE_VERSION = '20260108'
 
 interface StampOverlayProps {
   /** Whether to show the stamp (entry exists) */
@@ -81,7 +84,7 @@ export function StampOverlay({
       )}
     >
       <img
-        src="/image/seal-image.jpg"
+        src={`/image/seal-image.jpg?v=${SEAL_IMAGE_VERSION}`}
         alt="Compliment seal"
         className="w-[88px] h-[88px] object-contain rounded-full shadow-lg"
         draggable={false}
