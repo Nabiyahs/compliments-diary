@@ -76,10 +76,13 @@ export function StampOverlay({
 
   if (!show) return null
 
+  // Position: bottom-right of polaroid, overlapping photo corner AND text area
+  // Using bottom positioning to anchor from container bottom for better responsiveness
+  // bottom-[48px] places it to overlap both the photo's bottom-right and the caption area
   return (
     <div
       className={cn(
-        'absolute top-[180px] right-3 z-30 pointer-events-none',
+        'absolute bottom-[48px] right-4 z-30 pointer-events-none',
         isAnimating && 'animate-stamp-thump'
       )}
     >

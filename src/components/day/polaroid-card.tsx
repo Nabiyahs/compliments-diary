@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { startOfDay } from 'date-fns'
+import Image from 'next/image'
 import Moveable from 'react-moveable'
 import { AppIcon } from '@/components/ui/app-icon'
 import { cn, parseDateString } from '@/lib/utils'
@@ -339,14 +340,31 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             <div className="w-full h-[280px] flex items-center justify-center bg-gray-100 animate-pulse">
               <AppIcon name="spinner" className="w-8 h-8 animate-spin text-gray-400" />
             </div>
-          ) : displayPhotoUrl ? (
+          ) : pendingPhotoPreview ? (
+            // Local preview (blob URL) - use regular img since blob URLs can't go through next/image
             <img
-              src={displayPhotoUrl}
-              alt="Day photo"
+              src={pendingPhotoPreview}
+              alt="Day photo preview"
               className="w-full h-[280px] object-cover relative z-0"
               onClick={isEditing ? handleCameraClick : undefined}
               style={{ cursor: isEditing ? 'pointer' : 'default' }}
             />
+          ) : photoSignedUrl ? (
+            // Remote image from Supabase - use next/image for optimization
+            <div
+              className="relative w-full h-[280px]"
+              onClick={isEditing ? handleCameraClick : undefined}
+              style={{ cursor: isEditing ? 'pointer' : 'default' }}
+            >
+              <Image
+                src={photoSignedUrl}
+                alt="Day photo"
+                fill
+                sizes="(max-width: 768px) 100vw, 340px"
+                className="object-cover"
+                priority
+              />
+            </div>
           ) : dayCard?.photo_path ? (
             // Skeleton loader - photo exists but signed URL still loading
             <div className="w-full h-[280px] flex items-center justify-center bg-gray-100 animate-pulse">
