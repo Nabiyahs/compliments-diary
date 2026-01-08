@@ -178,12 +178,7 @@ export function MonthView({ onSelectDate }: MonthViewProps) {
                   />
                 )}
 
-                {/* Sticker indicator */}
-                {hasPhoto && dayData.stickers && dayData.stickers.length > 0 && (
-                  <div className="absolute bottom-0.5 right-0.5">
-                    <span className="text-[8px]">{dayData.stickers[0]}</span>
-                  </div>
-                )}
+                {/* Note: Stickers do NOT render in month view - only in Day View */}
 
                 {/* Loading shimmer */}
                 {loading && (

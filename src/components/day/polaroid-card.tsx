@@ -279,12 +279,12 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
   // Add sticker to draft (no server save - saved only on explicit Save action)
   const addSticker = (catalogSticker: CatalogSticker) => {
     const newSticker: StickerState = {
-      emoji: catalogSticker.src, // Store sticker path in emoji field
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      src: catalogSticker.src,
       x: 0.5, // Center horizontally
       y: 0.4, // Slightly above center
       scale: catalogSticker.defaultScale,
-      rotate: catalogSticker.defaultRotation,
-      z: draftStickers.length + 1,
+      rotation: catalogSticker.defaultRotation,
     }
     setDraftStickers(prev => [...prev, newSticker])
   }
@@ -404,11 +404,11 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
 
           {/* Stickers overlay - positioned absolutely within photo area */}
           {stickers.map((sticker, index) => {
-            const isImageSticker = sticker.emoji.startsWith('/')
+            const isImageSticker = sticker.src.startsWith('/')
             const isSelected = isEditing && selectedStickerIndex === index
             return (
               <div
-                key={index}
+                key={sticker.id}
                 ref={(el) => { stickerRefs.current[index] = el }}
                 className={cn(
                   'absolute select-none drop-shadow-md',
@@ -418,21 +418,21 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                 style={{
                   left: `${sticker.x * 100}%`,
                   top: `${sticker.y * 100}%`,
-                  transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotate}deg)`,
-                  zIndex: isSelected ? 50 : 10 + sticker.z,
+                  transform: `translate(-50%, -50%) scale(${sticker.scale}) rotate(${sticker.rotation}deg)`,
+                  zIndex: isSelected ? 50 : 10 + index,
                 }}
                 onClick={(e) => handleStickerClick(index, e)}
               >
                 {isImageSticker ? (
                   <img
-                    src={sticker.emoji}
+                    src={sticker.src}
                     alt="sticker"
                     className="w-20 h-20 object-contain pointer-events-none"
                     style={{ imageRendering: 'auto' }}
                     draggable={false}
                   />
                 ) : (
-                  <span className="text-3xl">{sticker.emoji}</span>
+                  <span className="text-3xl">{sticker.src}</span>
                 )}
               </div>
             )
@@ -478,7 +478,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                 const newScale = Math.max(0.4, Math.min(2.0, currentSticker.scale * scale[0]))
 
                 // Apply transform directly for smooth visual feedback
-                target.style.transform = `translate(-50%, -50%) scale(${newScale}) rotate(${currentSticker.rotate}deg)`
+                target.style.transform = `translate(-50%, -50%) scale(${newScale}) rotate(${currentSticker.rotation}deg)`
               }}
               onScaleEnd={({ target }) => {
                 const currentSticker = stickers[selectedStickerIndex]
@@ -504,8 +504,8 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                 const transform = target.style.transform
                 const rotateMatch = transform.match(/rotate\(([^)]+)deg\)/)
                 if (rotateMatch) {
-                  const rotate = parseFloat(rotateMatch[1])
-                  updateStickerTransform(selectedStickerIndex, { rotate })
+                  const rotation = parseFloat(rotateMatch[1])
+                  updateStickerTransform(selectedStickerIndex, { rotation })
                 }
               }}
             />

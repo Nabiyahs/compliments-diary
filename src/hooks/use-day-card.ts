@@ -7,25 +7,44 @@ import type { DayCard, StickerState } from '@/types/database'
 
 const DEBUG = process.env.NODE_ENV === 'development'
 
-// Safely parse sticker_state from database JSON
+// Safely parse sticker_state from database JSONB column
+// Expected shape: { stickers: StickerState[] } or null
+// NEVER throws - always returns a valid array (empty if parsing fails)
 function parseStickerState(data: unknown): StickerState[] {
-  if (!data) return []
+  // Handle null/undefined - treat as no stickers
+  if (data === null || data === undefined) return []
+
   try {
-    // Handle string JSON (shouldn't happen with JSONB but be safe)
+    // Handle string JSON (shouldn't happen with JSONB but be defensive)
     const parsed = typeof data === 'string' ? JSON.parse(data) : data
-    if (!Array.isArray(parsed)) return []
-    // Validate each sticker has required fields
-    return parsed.filter((s): s is StickerState =>
-      typeof s === 'object' && s !== null &&
-      typeof s.emoji === 'string' &&
-      typeof s.x === 'number' &&
-      typeof s.y === 'number' &&
-      typeof s.scale === 'number' &&
-      typeof s.rotate === 'number' &&
-      typeof s.z === 'number'
-    )
+
+    // Handle null after parsing
+    if (!parsed || typeof parsed !== 'object') return []
+
+    // Extract stickers array from wrapper: { stickers: [...] }
+    const stickersArray = Array.isArray(parsed)
+      ? parsed  // Legacy: direct array (for backwards compatibility)
+      : (parsed as { stickers?: unknown }).stickers
+
+    // No stickers array found
+    if (!Array.isArray(stickersArray)) return []
+
+    // Validate and filter each sticker - only include valid entries
+    return stickersArray.filter((s): s is StickerState => {
+      if (typeof s !== 'object' || s === null) return false
+      const sticker = s as Record<string, unknown>
+      return (
+        typeof sticker.id === 'string' &&
+        typeof sticker.src === 'string' &&
+        typeof sticker.x === 'number' &&
+        typeof sticker.y === 'number' &&
+        typeof sticker.scale === 'number' &&
+        typeof sticker.rotation === 'number'
+      )
+    })
   } catch {
-    console.warn('[useDayCard] Failed to parse sticker_state:', data)
+    // JSON parse error or any other error - return empty array, don't throw
+    if (DEBUG) console.warn('[useDayCard] Failed to parse sticker_state, using empty array')
     return []
   }
 }
@@ -146,14 +165,14 @@ export function useDayCard(date: string) {
       }
     } catch (err) {
       console.error('[useDayCard] Fetch error:', err)
-      // Set error state so UI can display it
-      if (!error) {
-        setError('Failed to load entry.')
-      }
+      // Set error state so UI can display it - use functional update to avoid dependency
+      setError(prevError => prevError || 'Failed to load entry.')
     } finally {
       setLoading(false)
     }
-  }, [date, supabase, fetchSignedUrl, error])
+    // NOTE: 'error' is intentionally NOT in deps to prevent infinite fetch loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, supabase, fetchSignedUrl])
 
   useEffect(() => {
     fetchDayCard()
@@ -248,7 +267,7 @@ export function useDayCard(date: string) {
       entry_date: string
       photo_path: string
       praise: string
-      sticker_state?: StickerState[]
+      sticker_state?: { stickers: StickerState[] } | null
     } = {
       user_id: user.id,
       entry_date: date,
@@ -258,9 +277,12 @@ export function useDayCard(date: string) {
         : (dayCard?.praise || ''),
     }
 
-    // Include sticker_state if provided
+    // Include sticker_state wrapped in { stickers: [...] } format
+    // This is the SINGLE source of truth for sticker data
     if (updates.sticker_state !== undefined) {
-      payload.sticker_state = updates.sticker_state
+      payload.sticker_state = updates.sticker_state.length > 0
+        ? { stickers: updates.sticker_state }
+        : null  // Store null for no stickers (cleaner than empty object)
     }
 
     console.log('[useDayCard] ═══════════════════════════════════════')

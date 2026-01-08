@@ -11,8 +11,8 @@ export interface WeekDayData {
   thumbUrl: string | null // Signed URL for display
   hasStamp: boolean
   caption: string | null
-  stickers: string[]
   time: string | null
+  // Note: stickers are NOT loaded in week view - they only render in Day View
 }
 
 export function useWeekData(anchorDate: Date) {
@@ -65,7 +65,6 @@ export function useWeekData(anchorDate: Date) {
             thumbUrl,
             hasStamp: false, // Not used in entries table
             caption: entry.praise, // Map praise to caption for UI compatibility
-            stickers: [], // Not used in entries table
             time,
           })
         }
