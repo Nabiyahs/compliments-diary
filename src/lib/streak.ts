@@ -2,11 +2,15 @@ import { formatDateString } from './utils'
 
 /**
  * Compute streak ending at anchor date
- * A day counts as "success" if it has at least 1 praise
+ * A day counts as "success" if it has an entry for that date
  * Streak revives when users backfill missing dates
+ *
+ * @param entryDates - Set of date strings in YYYY-MM-DD format
+ * @param anchorDate - Date to start counting backwards from (default: today)
+ * @returns The number of consecutive days with entries ending at anchorDate
  */
 export function computeStreak(
-  praiseDates: Set<string>,
+  entryDates: Set<string>,
   anchorDate: Date = new Date()
 ): number {
   let streak = 0
@@ -16,7 +20,7 @@ export function computeStreak(
   while (true) {
     const dateStr = formatDateString(current)
 
-    if (praiseDates.has(dateStr)) {
+    if (entryDates.has(dateStr)) {
       streak++
       current.setDate(current.getDate() - 1)
     } else {
@@ -28,12 +32,28 @@ export function computeStreak(
 }
 
 /**
- * Get all unique praise dates from a list of praises
+ * Compute streak from an array of entry objects
+ * This is a convenience function that extracts dates and calls computeStreak
+ *
+ * @param entries - Array of objects with entry_date field (YYYY-MM-DD format)
+ * @param anchorDate - Date to start counting backwards from (default: today in local timezone)
+ * @returns The number of consecutive days with entries ending at anchorDate
  */
-export function getPraiseDatesSet(
-  praises: { praise_date: string }[]
+export function computeStreakFromEntries(
+  entries: Array<{ entry_date: string }>,
+  anchorDate: Date = new Date()
+): number {
+  const entryDates = new Set(entries.map((e) => e.entry_date))
+  return computeStreak(entryDates, anchorDate)
+}
+
+/**
+ * Get all unique entry dates from a list of entries
+ */
+export function getEntryDatesSet(
+  entries: Array<{ entry_date: string }>
 ): Set<string> {
-  return new Set(praises.map((p) => p.praise_date))
+  return new Set(entries.map((e) => e.entry_date))
 }
 
 /**
@@ -45,12 +65,12 @@ export interface StreakInfo {
 }
 
 export function getStreakInfo(
-  praiseDates: Set<string>,
+  entryDates: Set<string>,
   selectedDate: Date
 ): StreakInfo {
   const today = new Date()
   return {
-    currentStreak: computeStreak(praiseDates, today),
-    selectedStreak: computeStreak(praiseDates, selectedDate),
+    currentStreak: computeStreak(entryDates, today),
+    selectedStreak: computeStreak(entryDates, selectedDate),
   }
 }
