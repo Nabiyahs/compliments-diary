@@ -64,12 +64,13 @@ export function StreakModal({
         </div>
 
         <div className="flex flex-col items-center justify-center py-6">
-          {/* Large flame icon with overlapping streak count */}
-          <div className="relative flex items-center justify-center mb-2">
-            {/* Enlarged flame icon */}
-            <AppIcon name="flame" className="w-28 h-28 text-orange-500" />
-            {/* Streak count positioned slightly below center of flame */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-[14px] whitespace-nowrap">
+          {/* Flame icon + streak count + message in vertical stack (no overlap) */}
+          <div className="flex flex-col items-center text-center gap-1 mb-4">
+            {/* Large flame icon */}
+            <AppIcon name="flame" className="w-20 h-20 text-orange-500" />
+
+            {/* Streak count below flame */}
+            <div className="whitespace-nowrap">
               <span className={cn(
                 "font-bold text-gray-800 leading-none",
                 currentStreak >= 100 ? "text-3xl" : "text-4xl"
