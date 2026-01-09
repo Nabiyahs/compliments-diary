@@ -16,8 +16,9 @@ const BASE_POLAROID_WIDTH = 340
 const BASE_POLAROID_HEIGHT = 440
 const BASE_PHOTO_AREA_HEIGHT = 280
 const BASE_PADDING = 16
-const BASE_CORNER_RADIUS = 16
-const BASE_PHOTO_CORNER_RADIUS = 12
+// Square corners (no rounded corners)
+const BASE_CORNER_RADIUS = 0
+const BASE_PHOTO_CORNER_RADIUS = 0
 
 // Brand text settings
 const BRAND_TEXT = 'DayPat'
@@ -43,8 +44,6 @@ interface ExportLayout {
   polaroidY: number
   /** Polaroid render scale (1 = base size) */
   polaroidScale: number
-  /** Brand font size in pixels (unscaled) */
-  brandFontSize: number
 }
 
 /**
@@ -84,7 +83,6 @@ function calculateExportLayout(target: ExportTarget): ExportLayout {
       polaroidX,
       polaroidY,
       polaroidScale,
-      brandFontSize: 22, // Small, on photo area
     }
   } else {
     // instagram_story / instagram_reel: 9:16 aspect ratio (1080x1920)
@@ -121,7 +119,6 @@ function calculateExportLayout(target: ExportTarget): ExportLayout {
       polaroidX,
       polaroidY,
       polaroidScale,
-      brandFontSize: 26, // Slightly larger for bigger canvas
     }
   }
 }
@@ -373,7 +370,7 @@ async function captureWithCanvas(
 
   // Calculate layout based on export target
   const layout = calculateExportLayout(target)
-  const { canvasWidth, canvasHeight, polaroidX, polaroidY, polaroidScale, brandFontSize } = layout
+  const { canvasWidth, canvasHeight, polaroidX, polaroidY, polaroidScale } = layout
 
   console.log('[EXPORT] Layout:', {
     canvasWidth,
@@ -381,7 +378,6 @@ async function captureWithCanvas(
     polaroidX: Math.round(polaroidX),
     polaroidY: Math.round(polaroidY),
     polaroidScale: polaroidScale.toFixed(3),
-    brandFontSize,
   })
 
   // Create canvas
@@ -511,15 +507,8 @@ async function captureWithCanvas(
   ctx.textBaseline = 'top'
   ctx.fillText(captionText, polaroidX + scaledPolaroidW / 2, captionY)
 
-  // Draw footer (time)
-  const footerY = captionY + 28 * polaroidScale
-  const timeText = data.createdAt
-    ? new Date(data.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : ''
-  ctx.font = `${10 * polaroidScale}px "Inter", system-ui, sans-serif`
-  ctx.fillStyle = '#9ca3af'
-  ctx.textAlign = 'left'
-  ctx.fillText(timeText, photoX + 6 * polaroidScale, footerY)
+  // NOTE: Timestamp (footer time) is intentionally NOT drawn in export
+  // It's only shown in Day View UI, not in shared images
 
   // Draw stamp if available (positioned inside photo area, bottom-right)
   if (data.showStamp && data.stampDataUrl) {
@@ -549,29 +538,33 @@ async function captureWithCanvas(
     }
   }
 
-  // Draw DayPat brand text INSIDE the photo area (top-left overlay)
+  // Draw DayPat brand text at BOTTOM-LEFT of polaroid container
   // Using Caveat font (same as app header) with #F27430 color
+  // Bigger font size for watermark-like appearance
   ctx.save()
-  ctx.font = `bold ${brandFontSize}px ${BRAND_FONT_FAMILY}`
+
+  // Calculate responsive font size based on polaroid width (larger than before)
+  const watermarkFontSize = Math.max(28, Math.min(36, scaledPolaroidW * 0.09))
+  ctx.font = `bold ${watermarkFontSize}px ${BRAND_FONT_FAMILY}`
   ctx.fillStyle = BRAND_COLOR
   ctx.textAlign = 'left'
-  ctx.textBaseline = 'top'
+  ctx.textBaseline = 'alphabetic'
 
-  // Position: top-left of PHOTO area (not canvas), with padding
-  const brandPadX = 16 * polaroidScale
-  const brandPadY = 12 * polaroidScale
-  const brandX = photoX + brandPadX
-  const brandY = photoY + brandPadY
+  // Position: bottom-left of POLAROID container (not photo area)
+  const brandPadX = 20 * polaroidScale
+  const brandPadY = 32 * polaroidScale
+  const brandX = polaroidX + brandPadX
+  const brandY = polaroidY + scaledPolaroidH - brandPadY
 
-  // Add subtle shadow for legibility on photos (very subtle)
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.3)'
+  // Add subtle shadow for legibility (very subtle)
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.15)'
   ctx.shadowBlur = 2
   ctx.shadowOffsetX = 0
   ctx.shadowOffsetY = 1
 
   ctx.fillText(BRAND_TEXT, brandX, brandY)
   ctx.restore()
-  console.log('[EXPORT] Brand text drawn on photo area')
+  console.log('[EXPORT] Brand text drawn at polaroid bottom-left')
 
   // Export canvas as PNG
   const dataUrl = canvas.toDataURL('image/png')

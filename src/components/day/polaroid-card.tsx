@@ -354,16 +354,16 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
 
   return (
     <div className="w-full max-w-[340px] mx-auto relative">
-      {/* Polaroid frame - constrained width with balanced padding */}
+      {/* Polaroid frame - constrained width with balanced padding, square corners */}
       <div
         ref={polaroidContainerRef}
-        className="bg-white rounded-2xl shadow-xl p-4 mb-4 relative"
+        className="bg-white shadow-xl p-4 mb-4 relative"
         style={{ transform: 'rotate(-1deg)' }}
       >
-        {/* Photo area - slightly reduced height */}
+        {/* Photo area - slightly reduced height, square corners */}
         <div
           ref={photoAreaRef}
-          className="bg-gray-100 rounded-xl overflow-hidden mb-3 relative"
+          className="bg-gray-100 overflow-hidden mb-3 relative"
           onClick={handlePhotoAreaClick}
         >
           {loading ? (
