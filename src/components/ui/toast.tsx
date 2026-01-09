@@ -25,7 +25,8 @@ export function Toast({ message, type = 'info', duration = 3000, onClose }: Toas
   }, [duration, onClose])
 
   const iconName = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'check-circle'
-  const bgColor = type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-500' : 'bg-gray-800'
+  // Success toast uses brand color #F27430
+  const bgColor = type === 'success' ? 'bg-[#F27430]' : type === 'error' ? 'bg-red-500' : 'bg-gray-800'
 
   return (
     <div

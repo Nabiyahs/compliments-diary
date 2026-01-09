@@ -798,10 +798,9 @@ export async function sharePolaroid(options: ExportOptions): Promise<ShareResult
 
     if (navigator.canShare?.({ files: [file] })) {
       try {
+        // Share image only - no title/text to avoid unwanted text in KakaoTalk and other apps
         await navigator.share({
           files: [file],
-          title: 'My Day Pat',
-          text: `My day on ${options.date}`,
         })
         return { success: true, method: 'shared' }
       } catch (err) {
