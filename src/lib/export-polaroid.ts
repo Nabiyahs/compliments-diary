@@ -90,6 +90,60 @@ const SLOGAN_FONT_FAMILY = "'Open Sans', sans-serif"
 const EXPORT_BACKGROUND_COLOR = '#FFFDF8'
 
 // =============================================================================
+// HEART ICON SVG PATH (Font Awesome faHeart - identical to day view)
+// =============================================================================
+// This is the exact same SVG path used by Font Awesome's solid heart icon
+// which is rendered in the day view via AppIcon component.
+// ViewBox: 512x512
+const FA_HEART_PATH = 'M241 87.1l15 20.7 15-20.7C296 52.5 336.2 32 378.9 32 452.4 32 512 91.6 512 165.1l0 2.6c0 112.2-139.9 242.5-212.9 298.2-12.4 9.4-27.6 14.1-43.1 14.1s-30.8-4.6-43.1-14.1C139.9 410.2 0 279.9 0 167.7l0-2.6C0 91.6 59.6 32 133.1 32 175.8 32 216 52.5 241 87.1z'
+const FA_HEART_VIEWBOX = 512
+
+/**
+ * Draw Font Awesome heart icon on canvas.
+ * Uses the exact same SVG path as the day view's AppIcon component.
+ *
+ * @param ctx - Canvas context
+ * @param x - Center X position
+ * @param y - Center Y position
+ * @param size - Icon size (width/height)
+ * @param filled - Whether to fill (liked) or stroke (not liked)
+ */
+function drawFontAwesomeHeart(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  filled: boolean
+): void {
+  ctx.save()
+
+  // Scale factor to convert from 512x512 viewbox to target size
+  const scale = size / FA_HEART_VIEWBOX
+
+  // Move to center position, then offset to draw from top-left of scaled icon
+  ctx.translate(x - size / 2, y - size / 2)
+  ctx.scale(scale, scale)
+
+  // Create path from Font Awesome SVG path data
+  const path = new Path2D(FA_HEART_PATH)
+
+  if (filled) {
+    // Liked state: filled red (matches day view's text-red-500 = #ef4444)
+    ctx.fillStyle = '#ef4444'
+    ctx.fill(path)
+  } else {
+    // Not liked state: gray outline (matches day view's text-gray-400 = #9ca3af)
+    // Use stroke instead of fill for outline effect
+    ctx.strokeStyle = '#9ca3af'
+    // Scale lineWidth inversely to maintain consistent visual thickness
+    ctx.lineWidth = 40 // Thick stroke at 512x512 scale, will be scaled down
+    ctx.stroke(path)
+  }
+
+  ctx.restore()
+}
+
+// =============================================================================
 // EXPORT TARGET DEFINITIONS
 // =============================================================================
 
@@ -683,31 +737,14 @@ async function renderPolaroidBaseCanvas(
   ctx.restore()
   console.log('[EXPORT] Slogan drawn')
 
-  // Draw heart icon (FIXED size and position)
+  // Draw heart icon using Font Awesome path (IDENTICAL to day view)
+  // Uses the exact same SVG path as AppIcon's faHeart
   const heartSize = footer.heartSize
   const heartX = BASE_POLAROID_WIDTH - padding - heartSize / 2
   const heartY = footerY
 
-  ctx.save()
-  ctx.translate(heartX, heartY)
-
-  ctx.beginPath()
-  const hs = heartSize * 0.45
-  ctx.moveTo(0, hs * 0.3)
-  ctx.bezierCurveTo(-hs * 0.5, -hs * 0.3, -hs, hs * 0.1, 0, hs)
-  ctx.bezierCurveTo(hs, hs * 0.1, hs * 0.5, -hs * 0.3, 0, hs * 0.3)
-  ctx.closePath()
-
-  if (data.isLiked) {
-    ctx.fillStyle = '#ef4444'
-    ctx.fill()
-  } else {
-    ctx.strokeStyle = '#9ca3af'
-    ctx.lineWidth = 1.5
-    ctx.stroke()
-  }
-  ctx.restore()
-  console.log('[EXPORT] Heart icon drawn, isLiked:', data.isLiked)
+  drawFontAwesomeHeart(ctx, heartX, heartY, heartSize, data.isLiked)
+  console.log('[EXPORT] Heart icon drawn (Font Awesome), isLiked:', data.isLiked)
 
   console.log('[EXPORT] Base canvas complete:', BASE_POLAROID_WIDTH, 'x', BASE_POLAROID_HEIGHT)
   return canvas
