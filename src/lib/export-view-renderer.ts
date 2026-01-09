@@ -400,10 +400,16 @@ async function fetchDayEntry(date: string): Promise<DayEntryData | null> {
     photoDataUrl = await downloadSupabaseImage(entry.photo_path)
   }
 
-  // Process stickers
+  // Process stickers from sticker_state column
+  // sticker_state is stored as { stickers: [...] } in the database
   const stickers: StickerData[] = []
-  if (entry.stickers && Array.isArray(entry.stickers)) {
-    for (const sticker of entry.stickers) {
+  const stickerStateData = entry.sticker_state as { stickers?: unknown[] } | unknown[] | null
+  const rawStickers = Array.isArray(stickerStateData)
+    ? stickerStateData  // Legacy: direct array
+    : (stickerStateData as { stickers?: unknown[] })?.stickers || []
+
+  if (Array.isArray(rawStickers)) {
+    for (const sticker of rawStickers as Array<{ src: string; x: number; y: number; scale?: number; rotation?: number }>) {
       let dataUrl: string | undefined
       if (sticker.src?.startsWith('/')) {
         dataUrl = await fetchLocalImage(sticker.src) || undefined
@@ -504,16 +510,25 @@ async function fetchMonthEntries(year: number, month: number): Promise<Map<strin
 /**
  * Check if an entry has any meaningful data.
  * Data exists if: praise, photo_path, stickers (non-empty), or show_stamp is true.
+ *
+ * NOTE: sticker_state is stored as { stickers: [...] } in the database.
  */
 function hasEntryData(entry: {
   praise?: string | null
   photo_path?: string | null
-  stickers?: unknown[] | null
+  sticker_state?: { stickers?: unknown[] } | unknown[] | null
   show_stamp?: boolean | null
 }): boolean {
   if (entry.praise && entry.praise.trim().length > 0) return true
   if (entry.photo_path) return true
-  if (entry.stickers && Array.isArray(entry.stickers) && entry.stickers.length > 0) return true
+  // Handle sticker_state: can be { stickers: [...] } or legacy direct array
+  if (entry.sticker_state) {
+    if (Array.isArray(entry.sticker_state) && entry.sticker_state.length > 0) return true
+    if (typeof entry.sticker_state === 'object' && 'stickers' in entry.sticker_state) {
+      const stickers = (entry.sticker_state as { stickers?: unknown[] }).stickers
+      if (Array.isArray(stickers) && stickers.length > 0) return true
+    }
+  }
   if (entry.show_stamp) return true
   return false
 }
@@ -530,14 +545,18 @@ export async function fetchDatesWithDataInRange(
 
   const { data: entries, error } = await supabase
     .from('entries')
-    .select('entry_date, praise, photo_path, stickers, show_stamp')
+    .select('entry_date, praise, photo_path, sticker_state, show_stamp')
     .gte('entry_date', fromDate)
     .lte('entry_date', toDate)
 
   const datesWithData = new Set<string>()
 
-  if (error || !entries) {
-    console.error('[ViewRenderer] fetchDatesWithDataInRange error:', error?.message)
+  if (error) {
+    console.error('[ViewRenderer] fetchDatesWithDataInRange error:', error.message)
+    return datesWithData
+  }
+
+  if (!entries) {
     return datesWithData
   }
 
@@ -548,6 +567,7 @@ export async function fetchDatesWithDataInRange(
   }
 
   console.log('[ViewRenderer] Dates with data in range:', datesWithData.size)
+
   return datesWithData
 }
 
