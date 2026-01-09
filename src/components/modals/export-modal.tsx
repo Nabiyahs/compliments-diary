@@ -42,13 +42,14 @@ const TYPE_DESCRIPTIONS: Record<ExportMode, string> = {
   day: 'Each day in the range will be exported as a polaroid page.',
   week: 'Each week in the range will be exported with all entries. Multiple pages per week if needed.',
   month: 'Each month in the range will be exported as a calendar grid page.',
-  favorites: 'All favorited entries in the range will be exported as a polaroid grid.',
+  favorites: 'All your favorited entries will be exported as a polaroid grid (date range not applied).',
 }
 
 // Get filename based on export mode and date range
 function getFilename(mode: ExportMode, fromDate: string, toDate: string): string {
   const fromStr = fromDate.replace(/-/g, '')
   const toStr = toDate.replace(/-/g, '')
+  const today = format(new Date(), 'yyyyMMdd')
 
   switch (mode) {
     case 'day':
@@ -58,7 +59,8 @@ function getFilename(mode: ExportMode, fromDate: string, toDate: string): string
     case 'month':
       return `DayPat_Months_${fromStr}-${toStr}.pdf`
     case 'favorites':
-      return `DayPat_Favorites_${fromStr}-${toStr}.pdf`
+      // Favorites ignores date range, use today's date
+      return `DayPat_Favorites_${today}.pdf`
     default:
       return 'DayPat_Export.pdf'
   }
