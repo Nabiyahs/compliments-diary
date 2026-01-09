@@ -1,10 +1,11 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { format } from 'date-fns'
 import { AppIcon } from '@/components/ui/app-icon'
 import { Toast, useToast } from '@/components/ui/toast'
 import { useDayCard } from '@/hooks/use-day-card'
+import { useSwipeNav } from '@/hooks/use-swipe-nav'
 import { formatDateString, parseDateString } from '@/lib/utils'
 import { sharePolaroid, type ExportOptions } from '@/lib/export-polaroid'
 import { PolaroidCard, type PolaroidCardRef } from './polaroid-card'
@@ -60,17 +61,23 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
     }
   }
 
-  const goToPrevDay = () => {
+  const goToPrevDay = useCallback(() => {
     const prev = new Date(date)
     prev.setDate(prev.getDate() - 1)
     onDateChange(formatDateString(prev))
-  }
+  }, [date, onDateChange])
 
-  const goToNextDay = () => {
+  const goToNextDay = useCallback(() => {
     const next = new Date(date)
     next.setDate(next.getDate() + 1)
     onDateChange(formatDateString(next))
-  }
+  }, [date, onDateChange])
+
+  // Swipe navigation: right = prev day, left = next day
+  const { getSwipeHandlers } = useSwipeNav({
+    onSwipeRight: goToPrevDay,
+    onSwipeLeft: goToNextDay,
+  })
 
   const handleSave = async (updates: {
     photo_url?: string | null
@@ -81,7 +88,11 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
   }
 
   return (
-    <div className="pb-6">
+    <div
+      className="pb-6"
+      style={{ touchAction: 'pan-y' }}
+      {...getSwipeHandlers()}
+    >
       {/* Date Navigation - compact header */}
       <div className="mb-3">
         <div className="flex items-center justify-between">
