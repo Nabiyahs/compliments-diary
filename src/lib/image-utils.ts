@@ -8,6 +8,16 @@
 const DEBUG = process.env.NODE_ENV === 'development'
 
 /**
+ * Error class for capture-related issues
+ */
+export class CaptureError extends Error {
+  constructor(message: string, public readonly details?: Record<string, unknown>) {
+    super(message)
+    this.name = 'CaptureError'
+  }
+}
+
+/**
  * Wait for next animation frame (layout stabilization).
  * Calling twice ensures both layout and paint are complete.
  */
@@ -17,6 +27,120 @@ export function nextPaint(): Promise<void> {
       requestAnimationFrame(() => resolve())
     })
   })
+}
+
+/**
+ * Assert that an element has a non-empty bounding rect.
+ * Throws CaptureError if the element is null or has zero/tiny dimensions.
+ *
+ * @param el - Element to validate
+ * @param label - Label for error messages (e.g., 'clone', 'target')
+ */
+export function assertNonEmptyRect(el: HTMLElement | null, label = 'element'): asserts el is HTMLElement {
+  if (!el) {
+    throw new CaptureError(`${label} is null`, { label })
+  }
+
+  const rect = el.getBoundingClientRect()
+  const styles = window.getComputedStyle(el)
+
+  if (DEBUG) {
+    console.log(`[image-utils] assertNonEmptyRect ${label}:`, {
+      width: rect.width,
+      height: rect.height,
+      display: styles.display,
+      visibility: styles.visibility,
+      opacity: styles.opacity,
+    })
+  }
+
+  if (rect.width < 10 || rect.height < 10) {
+    throw new CaptureError(`${label} has invalid dimensions: ${rect.width}x${rect.height}`, {
+      label,
+      width: rect.width,
+      height: rect.height,
+      display: styles.display,
+      visibility: styles.visibility,
+      opacity: styles.opacity,
+    })
+  }
+
+  if (styles.display === 'none') {
+    throw new CaptureError(`${label} has display:none`, { label, display: styles.display })
+  }
+
+  if (styles.visibility === 'hidden') {
+    throw new CaptureError(`${label} has visibility:hidden`, { label, visibility: styles.visibility })
+  }
+}
+
+/**
+ * Create an offscreen clone that remains renderable.
+ *
+ * CRITICAL: Do NOT use left:-9999px or display:none - these break rendering.
+ * Instead, use transform to move offscreen while keeping the element visible.
+ *
+ * @param source - Source element to clone
+ * @param options - Configuration options
+ * @returns Object with clone element and cleanup function
+ */
+export function createOffscreenClone(
+  source: HTMLElement,
+  options: {
+    /** Background color for the clone container */
+    backgroundColor?: string
+    /** Additional styles to apply to the clone */
+    additionalStyles?: Partial<CSSStyleDeclaration>
+  } = {}
+): { clone: HTMLElement; cleanup: () => void } {
+  const { backgroundColor = '#FFFDF8' } = options
+
+  // Get source dimensions before cloning
+  const sourceRect = source.getBoundingClientRect()
+
+  if (DEBUG) {
+    console.log('[image-utils] createOffscreenClone source rect:', {
+      width: sourceRect.width,
+      height: sourceRect.height,
+    })
+  }
+
+  // Clone the element
+  const clone = source.cloneNode(true) as HTMLElement
+
+  // CRITICAL: Set explicit dimensions to preserve layout
+  // Using fixed position with explicit width/height preserves rendering
+  clone.style.cssText = `
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: ${sourceRect.width}px !important;
+    height: ${sourceRect.height}px !important;
+    transform: translateX(-200vw) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    background: ${backgroundColor} !important;
+  `
+
+  // Apply any additional styles
+  if (options.additionalStyles) {
+    Object.assign(clone.style, options.additionalStyles)
+  }
+
+  // Append to body
+  document.body.appendChild(clone)
+
+  // Cleanup function
+  const cleanup = () => {
+    if (clone.parentNode) {
+      clone.parentNode.removeChild(clone)
+      if (DEBUG) console.log('[image-utils] Clone cleaned up')
+    }
+  }
+
+  return { clone, cleanup }
 }
 
 /**

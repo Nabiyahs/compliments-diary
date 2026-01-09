@@ -13,6 +13,9 @@ import {
   waitForImages,
   prepareImagesForCapture,
   replaceImageSrcsWithDataUrls,
+  createOffscreenClone,
+  assertNonEmptyRect,
+  CaptureError,
 } from '@/lib/image-utils'
 import { PolaroidCard, type PolaroidCardRef } from './polaroid-card'
 
@@ -55,64 +58,95 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
    * Returns a data URL of the final image.
    *
    * Key steps to ensure images appear in capture:
-   * 1. Wait for document fonts
-   * 2. Wait for layout/paint stabilization
-   * 3. Preload all images and convert to dataURLs (CORS safety)
-   * 4. Create offscreen clone with dataURL images
-   * 5. Wait for clone images to load
-   * 6. Capture the clone
+   * 1. Validate source element has non-zero dimensions
+   * 2. Wait for document fonts
+   * 3. Wait for layout/paint stabilization
+   * 4. Preload all images and convert to dataURLs (CORS safety)
+   * 5. Create offscreen clone with PROPER positioning (NOT left:-9999px!)
+   * 6. Replace image srcs with dataURLs in clone
+   * 7. Wait for clone images to load
+   * 8. Validate clone dimensions before capture
+   * 9. Capture the clone
+   *
+   * CRITICAL: The clone MUST use transform:translateX(-200vw) for offscreen,
+   * NOT position:absolute + left:-9999px which breaks element dimensions.
    */
   const captureDayView = async (target: ExportTarget): Promise<string> => {
     const element = dayViewRef.current
-    if (!element) throw new Error('Day View element not found')
+    if (!element) throw new CaptureError('Day View element not found')
 
     if (DEBUG) console.log('[DayView] Starting capture for target:', target)
 
-    // Step 1: Ensure fonts are loaded
+    // Step 1: Validate source element
+    assertNonEmptyRect(element, 'DayView source')
+    if (DEBUG) console.log('[DayView] Source element validated')
+
+    // Step 2: Ensure fonts are loaded
     await document.fonts.ready
     if (DEBUG) console.log('[DayView] Fonts ready')
 
-    // Step 2: Wait for layout/paint stabilization
+    // Step 3: Wait for layout/paint stabilization
     await nextPaint()
     if (DEBUG) console.log('[DayView] Paint stabilized')
 
-    // Step 3: Preload all images and convert to dataURLs (CORS safety)
+    // Step 4: Preload all images and convert to dataURLs (CORS safety)
     // This ensures external images (Supabase storage) don't cause tainted canvas issues
     const imageUrlMap = await prepareImagesForCapture(element, { timeoutMs: IMAGE_PRELOAD_TIMEOUT })
     if (DEBUG) console.log('[DayView] Images preloaded:', imageUrlMap.size)
 
-    // Step 4: Create offscreen clone with dataURL images
-    const clone = element.cloneNode(true) as HTMLElement
-    clone.style.position = 'absolute'
-    clone.style.left = '-9999px'
-    clone.style.top = '0'
-    document.body.appendChild(clone)
+    // Step 5: Create offscreen clone with PROPER positioning
+    // CRITICAL: Use transform for offscreen, NOT left:-9999px
+    const { clone, cleanup } = createOffscreenClone(element, {
+      backgroundColor: EXPORT_BG_COLOR,
+    })
 
     try {
-      // Replace image srcs with dataURLs in the clone
+      // Step 6: Replace image srcs with dataURLs in the clone
       replaceImageSrcsWithDataUrls(clone, imageUrlMap)
       if (DEBUG) console.log('[DayView] Clone images replaced with dataURLs')
 
-      // Step 5: Wait for clone images to fully load
+      // Step 7: Wait for clone images to fully load
       await nextPaint()
       await waitForImages(clone, { timeoutMs: 3000 })
       if (DEBUG) console.log('[DayView] Clone images loaded')
 
-      // Step 6: Capture the clone at high resolution (2x for quality)
+      // Step 8: Validate clone dimensions before capture
+      // Move clone briefly to visible area to verify dimensions
+      clone.style.transform = 'translateX(0)'
+      await nextPaint()
+      assertNonEmptyRect(clone, 'DayView clone')
+      // Move back offscreen for capture (some capture libs work better with visible elements)
+      // Actually, keep it visible for capture - toPng works on visible elements
+      if (DEBUG) console.log('[DayView] Clone validated')
+
+      // Step 9: Capture the clone at high resolution (2x for quality)
       const pixelRatio = 2
       const dataUrl = await toPng(clone, {
         pixelRatio,
         backgroundColor: EXPORT_BG_COLOR,
         cacheBust: true,
         skipFonts: false,
+        // Filter out elements that shouldn't be captured
+        filter: (node: HTMLElement) => {
+          // Exclude welcome screen if somehow present
+          if (node.id === 'welcome-screen') return false
+          return true
+        },
       })
-      if (DEBUG) console.log('[DayView] Clone captured')
+
+      // Verify captured data is not blank (minimum viable PNG is ~100 bytes)
+      if (!dataUrl || dataUrl.length < 200) {
+        throw new CaptureError('Captured image is blank or too small', {
+          dataUrlLength: dataUrl?.length ?? 0,
+        })
+      }
+      if (DEBUG) console.log('[DayView] Clone captured, dataUrl length:', dataUrl.length)
 
       // Load the captured image
       const img = new Image()
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve()
-        img.onerror = reject
+        img.onerror = () => reject(new CaptureError('Failed to load captured image'))
         img.src = dataUrl
       })
 
@@ -143,8 +177,7 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
       return canvas.toDataURL('image/png')
     } finally {
       // Always clean up the clone
-      document.body.removeChild(clone)
-      if (DEBUG) console.log('[DayView] Clone cleaned up')
+      cleanup()
     }
   }
 
@@ -208,7 +241,13 @@ export function DayView({ selectedDate, onDateChange }: DayViewProps) {
       }
     } catch (err) {
       console.error('[DayView] Share failed:', err)
-      showToast('Something went wrong', 'error')
+      // Provide more specific error messages for debugging
+      if (err instanceof CaptureError) {
+        console.error('[DayView] CaptureError details:', err.details)
+        showToast('Failed to capture image', 'error')
+      } else {
+        showToast('Something went wrong', 'error')
+      }
     } finally {
       // ALWAYS reset loading states, regardless of success/failure/cancel
       if (DEBUG) console.log('[DayView] Share flow complete, resetting states')
