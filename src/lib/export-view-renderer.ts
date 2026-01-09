@@ -107,12 +107,24 @@ const MONTH_LAYOUT = {
 }
 
 // Day Polaroid layout (matches export-polaroid.ts)
+// lineHeight: 1.625 matches Tailwind's "leading-relaxed" used in Day View
 const POLAROID_LAYOUT = {
   width: 340,
   height: 440,
   padding: 16,
   photo: { x: 16, y: 16, width: 308, height: 280 },
-  comment: { x: 16, y: 314, width: 308, height: 80, fontSize: 14, lineHeight: 1.4, maxLines: 4 },
+  comment: {
+    x: 16,
+    y: 314,
+    width: 308,
+    height: 80,
+    fontSize: 14,
+    lineHeight: 1.625, // MUST match Day View's "leading-relaxed" (Tailwind)
+    maxLines: 4,
+    fontFamily: '"Inter", "Noto Sans KR", system-ui, sans-serif',
+    fontWeight: 500,
+    baselineAdjustPx: 2, // Fine-tune for canvas vs DOM metrics
+  },
   footer: { y: 424, sloganFontSize: 11, heartSize: 16 },
   watermark: { x: 28, y: 28, fontSize: 20 },
   stamp: { size: 70, margin: 10 },
@@ -127,6 +139,42 @@ const EXPORT_BACKGROUND_COLOR = '#FFFDF8'
 
 const WEEKDAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
 const WEEKDAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+// =============================================================================
+// HEART ICON SVG PATH (Font Awesome faHeart - identical to day view)
+// =============================================================================
+// This is the exact same SVG path used by Font Awesome's solid heart icon
+// which is rendered in the day view via AppIcon component.
+// ViewBox: 512x512
+const FA_HEART_PATH = 'M241 87.1l15 20.7 15-20.7C296 52.5 336.2 32 378.9 32 452.4 32 512 91.6 512 165.1l0 2.6c0 112.2-139.9 242.5-212.9 298.2-12.4 9.4-27.6 14.1-43.1 14.1s-30.8-4.6-43.1-14.1C139.9 410.2 0 279.9 0 167.7l0-2.6C0 91.6 59.6 32 133.1 32 175.8 32 216 52.5 241 87.1z'
+const FA_HEART_VIEWBOX = 512
+
+/**
+ * Draw Font Awesome heart icon on canvas.
+ * Uses the exact same SVG path as the day view's AppIcon component.
+ */
+function drawFontAwesomeHeart(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  filled: boolean
+): void {
+  ctx.save()
+  const scale = size / FA_HEART_VIEWBOX
+  ctx.translate(x - size / 2, y - size / 2)
+  ctx.scale(scale, scale)
+  const path = new Path2D(FA_HEART_PATH)
+  if (filled) {
+    ctx.fillStyle = '#ef4444'
+    ctx.fill(path)
+  } else {
+    ctx.strokeStyle = '#9ca3af'
+    ctx.lineWidth = 40
+    ctx.stroke(path)
+  }
+  ctx.restore()
+}
 
 // ============================================================
 // IMAGE UTILITIES
@@ -570,13 +618,12 @@ async function renderDayPolaroid(entry: DayEntryData): Promise<HTMLCanvasElement
     }
   }
 
-  // Caption
+  // Caption - render with same settings as export-polaroid.ts
+  // Uses lineHeight 1.625 (Tailwind's "leading-relaxed") to match Day View
   const comment = POLAROID_LAYOUT.comment
-  ctx.font = `500 ${comment.fontSize}px ${POLAROID_LAYOUT.padding}px ${WEEK_LAYOUT.fontFamily}`
-  ctx.font = `500 ${comment.fontSize}px "Inter", "Noto Sans KR", system-ui, sans-serif`
-  ctx.fillStyle = '#374151'
+  ctx.font = `${comment.fontWeight} ${comment.fontSize}px ${comment.fontFamily}`
   ctx.textAlign = 'center'
-  ctx.textBaseline = 'top'
+  ctx.textBaseline = 'top' // CRITICAL: Use 'top' for consistent positioning like DOM
 
   const displayText = entry.praise || 'Give your day a pat.'
   const displayColor = entry.praise ? '#374151' : '#9ca3af'
@@ -584,17 +631,22 @@ async function renderDayPolaroid(entry: DayEntryData): Promise<HTMLCanvasElement
 
   const lines = wrapText(ctx, displayText, comment.width - 8)
   const truncatedLines = truncateWithEllipsis(ctx, lines, comment.maxLines, comment.width - 8)
-  const lineHeightPx = comment.fontSize * comment.lineHeight
+  // PIXEL ROUNDING: Round lineHeight to integer for consistent spacing
+  const lineHeightPx = Math.round(comment.fontSize * comment.lineHeight)
 
   ctx.save()
   ctx.beginPath()
   ctx.rect(comment.x, comment.y, comment.width, comment.height)
   ctx.clip()
 
-  let currentY = comment.y
-  for (const line of truncatedLines) {
-    ctx.fillText(line, comment.x + comment.width / 2, currentY)
-    currentY += lineHeightPx
+  // PIXEL ROUNDING: Round coordinates to integers for crisp text rendering
+  const startX = Math.round(comment.x + comment.width / 2)
+  const startY = Math.round(comment.y + comment.baselineAdjustPx)
+
+  for (let i = 0; i < truncatedLines.length; i++) {
+    // Calculate Y position with integer-based line height (no cumulative float error)
+    const currentY = startY + i * lineHeightPx
+    ctx.fillText(truncatedLines[i], startX, currentY)
   }
   ctx.restore()
 
@@ -606,29 +658,11 @@ async function renderDayPolaroid(entry: DayEntryData): Promise<HTMLCanvasElement
   ctx.textBaseline = 'middle'
   ctx.fillText(SLOGAN_TEXT, POLAROID_LAYOUT.padding, footer.y)
 
-  // Heart icon
+  // Heart icon using Font Awesome path (IDENTICAL to day view)
   const heartSize = footer.heartSize
   const heartX = POLAROID_LAYOUT.width - POLAROID_LAYOUT.padding - heartSize / 2
   const heartY = footer.y
-
-  ctx.save()
-  ctx.translate(heartX, heartY)
-  ctx.beginPath()
-  const hs = heartSize * 0.45
-  ctx.moveTo(0, hs * 0.3)
-  ctx.bezierCurveTo(-hs * 0.5, -hs * 0.3, -hs, hs * 0.1, 0, hs)
-  ctx.bezierCurveTo(hs, hs * 0.1, hs * 0.5, -hs * 0.3, 0, hs * 0.3)
-  ctx.closePath()
-
-  if (entry.isLiked) {
-    ctx.fillStyle = '#ef4444'
-    ctx.fill()
-  } else {
-    ctx.strokeStyle = '#9ca3af'
-    ctx.lineWidth = 1.5
-    ctx.stroke()
-  }
-  ctx.restore()
+  drawFontAwesomeHeart(ctx, heartX, heartY, heartSize, entry.isLiked)
 
   return canvas
 }

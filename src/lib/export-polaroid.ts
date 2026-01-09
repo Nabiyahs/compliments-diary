@@ -38,16 +38,19 @@ const POLAROID_LAYOUT = {
   },
 
   // Comment area (FIXED - text clips if too long)
+  // lineHeight: 1.625 matches Tailwind's "leading-relaxed" used in Day View
   comment: {
     x: 16,
     y: 314,     // photo.y + photo.height + 18
     width: 308,
     height: 80, // Fixed height - text MUST fit or be clipped
     fontSize: 14,
-    lineHeight: 1.4,
+    lineHeight: 1.625, // MUST match Day View's "leading-relaxed" (Tailwind)
     maxLines: 4, // Maximum lines before truncation with ellipsis
     fontFamily: '"Inter", "Noto Sans KR", system-ui, sans-serif',
     fontWeight: 500,
+    // Baseline adjustment for canvas vs DOM font metrics (fine-tune if needed)
+    baselineAdjustPx: 2,
   },
 
   // Footer area (FIXED)
@@ -88,6 +91,60 @@ const SLOGAN_TEXT = 'EVERY DAY DESERVES A PAT.'
 const SLOGAN_FONT_FAMILY = "'Open Sans', sans-serif"
 // Background color (warm cream to match app theme)
 const EXPORT_BACKGROUND_COLOR = '#FFFDF8'
+
+// =============================================================================
+// HEART ICON SVG PATH (Font Awesome faHeart - identical to day view)
+// =============================================================================
+// This is the exact same SVG path used by Font Awesome's solid heart icon
+// which is rendered in the day view via AppIcon component.
+// ViewBox: 512x512
+const FA_HEART_PATH = 'M241 87.1l15 20.7 15-20.7C296 52.5 336.2 32 378.9 32 452.4 32 512 91.6 512 165.1l0 2.6c0 112.2-139.9 242.5-212.9 298.2-12.4 9.4-27.6 14.1-43.1 14.1s-30.8-4.6-43.1-14.1C139.9 410.2 0 279.9 0 167.7l0-2.6C0 91.6 59.6 32 133.1 32 175.8 32 216 52.5 241 87.1z'
+const FA_HEART_VIEWBOX = 512
+
+/**
+ * Draw Font Awesome heart icon on canvas.
+ * Uses the exact same SVG path as the day view's AppIcon component.
+ *
+ * @param ctx - Canvas context
+ * @param x - Center X position
+ * @param y - Center Y position
+ * @param size - Icon size (width/height)
+ * @param filled - Whether to fill (liked) or stroke (not liked)
+ */
+function drawFontAwesomeHeart(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  size: number,
+  filled: boolean
+): void {
+  ctx.save()
+
+  // Scale factor to convert from 512x512 viewbox to target size
+  const scale = size / FA_HEART_VIEWBOX
+
+  // Move to center position, then offset to draw from top-left of scaled icon
+  ctx.translate(x - size / 2, y - size / 2)
+  ctx.scale(scale, scale)
+
+  // Create path from Font Awesome SVG path data
+  const path = new Path2D(FA_HEART_PATH)
+
+  if (filled) {
+    // Liked state: filled red (matches day view's text-red-500 = #ef4444)
+    ctx.fillStyle = '#ef4444'
+    ctx.fill(path)
+  } else {
+    // Not liked state: gray outline (matches day view's text-gray-400 = #9ca3af)
+    // Use stroke instead of fill for outline effect
+    ctx.strokeStyle = '#9ca3af'
+    // Scale lineWidth inversely to maintain consistent visual thickness
+    ctx.lineWidth = 40 // Thick stroke at 512x512 scale, will be scaled down
+    ctx.stroke(path)
+  }
+
+  ctx.restore()
+}
 
 // =============================================================================
 // EXPORT TARGET DEFINITIONS
@@ -337,6 +394,11 @@ function truncateWithEllipsis(
  * Draw wrapped text within a fixed box, with clipping and ellipsis truncation.
  * The box dimensions are FIXED - text is clipped if it exceeds the box.
  *
+ * Text rendering is optimized to match Day View (DOM) appearance:
+ * - textBaseline: 'top' for consistent positioning
+ * - Pixel rounding to eliminate sub-pixel blurring
+ * - baselineAdjustPx for fine-tuning canvas vs DOM font metrics
+ *
  * @param ctx - Canvas context
  * @param text - Text to draw
  * @param box - Fixed box dimensions { x, y, width, height }
@@ -356,10 +418,14 @@ function drawTextInFixedBox(
     align: CanvasTextAlign
     placeholder?: string
     placeholderColor?: string
+    /** Fine-tune vertical offset to match DOM text rendering (canvas vs browser font metrics) */
+    baselineAdjustPx?: number
   }
 ): void {
-  const { fontSize, lineHeight, maxLines, fontFamily, fontWeight, color, align, placeholder, placeholderColor } = options
-  const lineHeightPx = fontSize * lineHeight
+  const { fontSize, lineHeight, maxLines, fontFamily, fontWeight, color, align, placeholder, placeholderColor, baselineAdjustPx = 0 } = options
+
+  // Calculate line height in pixels and ROUND to integer for consistent spacing
+  const lineHeightPx = Math.round(fontSize * lineHeight)
 
   // Set font
   ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
@@ -368,7 +434,7 @@ function drawTextInFixedBox(
   const displayText = text || placeholder || ''
   const displayColor = text ? color : (placeholderColor || '#9ca3af')
 
-  // Wrap text
+  // Wrap text (font must be set before this for accurate measurement)
   const lines = wrapText(ctx, displayText, box.width - 8) // Small padding
 
   // Truncate with ellipsis if exceeds maxLines
@@ -380,21 +446,25 @@ function drawTextInFixedBox(
   ctx.rect(box.x, box.y, box.width, box.height)
   ctx.clip()
 
-  // Draw text
+  // Draw text with consistent baseline
   ctx.fillStyle = displayColor
   ctx.textAlign = align
-  ctx.textBaseline = 'top'
+  ctx.textBaseline = 'top' // CRITICAL: Use 'top' for consistent positioning like DOM
 
-  const startX = align === 'center' ? box.x + box.width / 2 : box.x
-  let currentY = box.y
+  // PIXEL ROUNDING: Round coordinates to integers for crisp text rendering
+  const startX = Math.round(align === 'center' ? box.x + box.width / 2 : box.x)
+  // Apply baseline adjustment to match DOM font metrics
+  const startY = Math.round(box.y + baselineAdjustPx)
 
-  for (const line of truncatedLines) {
+  for (let i = 0; i < truncatedLines.length; i++) {
+    // Calculate Y position with integer-based line height (no cumulative float error)
+    const currentY = startY + i * lineHeightPx
+
     // Stop if we would draw outside the box
     if (currentY + lineHeightPx > box.y + box.height) {
       break
     }
-    ctx.fillText(line, startX, currentY)
-    currentY += lineHeightPx
+    ctx.fillText(truncatedLines[i], startX, currentY)
   }
 
   ctx.restore()
@@ -471,20 +541,25 @@ async function prepareExportData(
 
 /**
  * Wait for fonts to be loaded before drawing text.
+ * CRITICAL: Comment font must be loaded before wrapText() for accurate measurement.
  */
 async function ensureFontsLoaded(): Promise<void> {
   if (typeof document === 'undefined') return
+
+  const { comment } = POLAROID_LAYOUT
 
   try {
     // Wait for all fonts to be ready
     await document.fonts.ready
 
-    // Specifically load the fonts we need
+    // Specifically load the fonts we need (including comment font for accurate text measurement)
     await Promise.all([
       document.fonts.load(`bold 48px ${BRAND_FONT_FAMILY}`),  // DayPat watermark
       document.fonts.load(`500 11px ${SLOGAN_FONT_FAMILY}`),  // Slogan text
+      document.fonts.load(`${comment.fontWeight} ${comment.fontSize}px "Inter"`),  // Comment font
+      document.fonts.load(`${comment.fontWeight} ${comment.fontSize}px "Noto Sans KR"`),  // Korean fallback
     ])
-    console.log('[EXPORT] Fonts loaded successfully')
+    console.log('[EXPORT] Fonts loaded successfully (including comment font)')
   } catch (e) {
     console.warn('[EXPORT] Font loading warning:', e)
     // Continue even if font loading fails - canvas will use fallback
@@ -650,6 +725,7 @@ async function renderPolaroidBaseCanvas(
 
   // Draw caption text in FIXED box (never expands based on content)
   // Uses POLAROID_LAYOUT.comment for all dimensions - these are FIXED constants
+  // lineHeight matches Day View's "leading-relaxed" (1.625) for consistent bottom padding
   const { comment } = POLAROID_LAYOUT
   drawTextInFixedBox(
     ctx,
@@ -657,7 +733,7 @@ async function renderPolaroidBaseCanvas(
     { x: comment.x, y: comment.y, width: comment.width, height: comment.height },
     {
       fontSize: comment.fontSize,
-      lineHeight: comment.lineHeight,
+      lineHeight: comment.lineHeight, // 1.625 = Tailwind's "leading-relaxed"
       maxLines: comment.maxLines,
       fontFamily: comment.fontFamily,
       fontWeight: comment.fontWeight,
@@ -665,9 +741,10 @@ async function renderPolaroidBaseCanvas(
       align: 'center',
       placeholder: 'Give your day a pat.',
       placeholderColor: '#9ca3af',
+      baselineAdjustPx: comment.baselineAdjustPx, // Fine-tune for canvas vs DOM metrics
     }
   )
-  console.log('[EXPORT] Caption drawn in fixed box:', comment.width, 'x', comment.height)
+  console.log('[EXPORT] Caption drawn in fixed box:', comment.width, 'x', comment.height, 'lineHeight:', comment.lineHeight)
 
   // Draw footer: slogan on left, heart icon on right (FIXED positions from POLAROID_LAYOUT)
   const { footer } = POLAROID_LAYOUT
@@ -683,31 +760,14 @@ async function renderPolaroidBaseCanvas(
   ctx.restore()
   console.log('[EXPORT] Slogan drawn')
 
-  // Draw heart icon (FIXED size and position)
+  // Draw heart icon using Font Awesome path (IDENTICAL to day view)
+  // Uses the exact same SVG path as AppIcon's faHeart
   const heartSize = footer.heartSize
   const heartX = BASE_POLAROID_WIDTH - padding - heartSize / 2
   const heartY = footerY
 
-  ctx.save()
-  ctx.translate(heartX, heartY)
-
-  ctx.beginPath()
-  const hs = heartSize * 0.45
-  ctx.moveTo(0, hs * 0.3)
-  ctx.bezierCurveTo(-hs * 0.5, -hs * 0.3, -hs, hs * 0.1, 0, hs)
-  ctx.bezierCurveTo(hs, hs * 0.1, hs * 0.5, -hs * 0.3, 0, hs * 0.3)
-  ctx.closePath()
-
-  if (data.isLiked) {
-    ctx.fillStyle = '#ef4444'
-    ctx.fill()
-  } else {
-    ctx.strokeStyle = '#9ca3af'
-    ctx.lineWidth = 1.5
-    ctx.stroke()
-  }
-  ctx.restore()
-  console.log('[EXPORT] Heart icon drawn, isLiked:', data.isLiked)
+  drawFontAwesomeHeart(ctx, heartX, heartY, heartSize, data.isLiked)
+  console.log('[EXPORT] Heart icon drawn (Font Awesome), isLiked:', data.isLiked)
 
   console.log('[EXPORT] Base canvas complete:', BASE_POLAROID_WIDTH, 'x', BASE_POLAROID_HEIGHT)
   return canvas
