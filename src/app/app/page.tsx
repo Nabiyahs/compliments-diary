@@ -292,9 +292,6 @@ export default function AppPage() {
         onClose={() => setExportOpen(false)}
         activeView={activeView}
         selectedDate={selectedDate}
-        weekAnchorDate={currentWeekStart}
-        monthYear={currentMonth.getFullYear()}
-        monthIndex={currentMonth.getMonth()}
       />
       <DayViewModal
         isOpen={dayViewModalOpen}
