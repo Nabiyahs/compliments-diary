@@ -70,7 +70,7 @@ export function IntroModal({ isOpen, onClose }: IntroModalProps) {
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Caveat, cursive' }}>DayPat</h2>
+          <h2 className="text-2xl font-bold text-[#F27430]" style={{ fontFamily: 'Caveat, cursive' }}>DayPat</h2>
           <button
             onClick={onClose}
             className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-100"
