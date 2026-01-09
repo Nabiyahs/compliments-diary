@@ -185,6 +185,51 @@ body {
 }
 
 /* ============================================
+   SNS Share Export Mode Styles
+   Applied when data-exporting="true" is set on polaroid container
+   ============================================ */
+
+/* Hide stamp overlay during export */
+[data-exporting="true"] [data-stamp="true"] {
+  display: none !important;
+}
+
+/* Hide stickers during export */
+[data-exporting="true"] [data-sticker="true"] {
+  display: none !important;
+}
+
+/* Remove shadow from polaroid container during export */
+[data-exporting="true"] {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* Hide edit/action buttons during export */
+[data-exporting="true"] [data-export-exclude="true"] {
+  display: none !important;
+}
+
+/* DayPat watermark - only visible during export */
+.daypat-watermark {
+  display: none;
+}
+
+[data-exporting="true"] .daypat-watermark {
+  display: block !important;
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 30;
+  color: #F27430;
+  font-family: 'Caveat', 'Comic Sans MS', cursive;
+  font-size: 20px;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  pointer-events: none;
+}
+
+/* ============================================
    Desktop Letterboxing (AppShell)
    Mobile UI centered on larger screens
    ============================================ */

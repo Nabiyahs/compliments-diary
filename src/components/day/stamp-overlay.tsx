@@ -81,6 +81,7 @@ export function StampOverlay({
   // Nudged slightly up from bottom edge to avoid overlapping other UI elements
   return (
     <div
+      data-stamp="true"
       className={cn(
         'absolute bottom-3 right-3 z-20 pointer-events-none',
         isAnimating && 'animate-stamp-thump'

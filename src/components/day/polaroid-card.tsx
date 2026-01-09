@@ -378,14 +378,18 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             </div>
           ) : displayPhotoUrl ? (
             // Photo display - local preview or remote image
-            <img
-              src={displayPhotoUrl}
-              alt="Day photo"
-              className="w-full h-[280px] object-cover"
-              crossOrigin={pendingPhotoPreview ? undefined : "anonymous"}
-              onClick={isEditing ? handleCameraClick : undefined}
-              style={{ cursor: isEditing ? 'pointer' : 'default' }}
-            />
+            <>
+              <img
+                src={displayPhotoUrl}
+                alt="Day photo"
+                className="w-full h-[280px] object-cover"
+                crossOrigin={pendingPhotoPreview ? undefined : "anonymous"}
+                onClick={isEditing ? handleCameraClick : undefined}
+                style={{ cursor: isEditing ? 'pointer' : 'default' }}
+              />
+              {/* DayPat watermark - only visible during export (controlled by CSS) */}
+              <span className="daypat-watermark">DayPat</span>
+            </>
           ) : dayCard?.photo_path && !pendingPhotoDelete ? (
             // Skeleton loader - photo exists but signed URL still loading
             <div className="w-full h-[280px] flex items-center justify-center bg-gray-100 animate-pulse">
@@ -474,6 +478,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             return (
               <div
                 key={sticker.id}
+                data-sticker="true"
                 ref={(el) => { stickerRefs.current[index] = el }}
                 className={cn(
                   'absolute select-none drop-shadow-md',
