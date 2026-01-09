@@ -1854,27 +1854,26 @@ interface FavoriteEntry {
 }
 
 /**
- * Fetch favorites within date range from Supabase.
+ * Fetch ALL favorites from Supabase (matching Favorites screen behavior).
+ * NOTE: Favorites export ignores date range - it exports ALL favorites.
+ * This matches the Favorites screen which shows all liked entries.
  */
-async function fetchFavoritesInRange(fromDate: string, toDate: string): Promise<FavoriteEntry[]> {
+async function fetchAllFavorites(): Promise<FavoriteEntry[]> {
   const supabase = getSupabaseClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
-
+  // Query matches use-favorites.ts - uses 'entries' table, no date filter
   const { data, error } = await supabase
-    .from('day_entries')
+    .from('entries')
     .select('id, entry_date, praise, photo_path')
-    .eq('user_id', user.id)
     .eq('is_liked', true)
-    .gte('entry_date', fromDate)
-    .lte('entry_date', toDate)
     .order('entry_date', { ascending: false })
 
   if (error) {
     console.error('[ViewRenderer] Failed to fetch favorites:', error)
     return []
   }
+
+  console.log('[ViewRenderer] fetchAllFavorites: found', data?.length || 0, 'entries')
 
   // Download photos and convert to data URLs
   const favorites: FavoriteEntry[] = []
@@ -1884,7 +1883,7 @@ async function fetchFavoritesInRange(fromDate: string, toDate: string): Promise<
       photoDataUrl = await downloadSupabaseImage(entry.photo_path) || undefined
     }
     favorites.push({
-      id: entry.id,
+      id: String(entry.id),
       date: entry.entry_date,
       entry_date: entry.entry_date,
       praise: entry.praise,
@@ -2021,51 +2020,23 @@ async function drawFavoriteCard(
 }
 
 /**
- * Render Favorites pages for a date range.
+ * Render Favorites pages.
+ * NOTE: Favorites export ignores date range - it exports ALL favorites
+ * to match the Favorites screen behavior.
  * Displays favorites in a 2-column grid layout.
  */
-export async function renderFavoritesPages(fromDate: string, toDate: string): Promise<PageImage[]> {
-  console.log('[ViewRenderer] renderFavoritesPages:', fromDate, 'to', toDate)
+export async function renderFavoritesPages(_fromDate: string, _toDate: string): Promise<PageImage[]> {
+  console.log('[ViewRenderer] renderFavoritesPages: exporting ALL favorites (date range ignored)')
   await ensureFontsLoaded()
 
-  const favorites = await fetchFavoritesInRange(fromDate, toDate)
-  console.log('[ViewRenderer] Found', favorites.length, 'favorites')
+  // Fetch ALL favorites (ignoring date range, matching Favorites screen)
+  const favorites = await fetchAllFavorites()
+  console.log('[ViewRenderer] Found', favorites.length, 'total favorites')
 
   if (favorites.length === 0) {
-    // Return empty page with message
-    const canvas = document.createElement('canvas')
-    canvas.width = PDF_PAGE.width
-    canvas.height = PDF_PAGE.height
-    const ctx = canvas.getContext('2d')!
-
-    ctx.fillStyle = EXPORT_BACKGROUND_COLOR
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-    // Header
-    ctx.font = `bold 32px ${WEEK_LAYOUT.fontFamily}`
-    ctx.fillStyle = '#1f2937'
-    ctx.textAlign = 'center'
-    ctx.fillText('Favorite Moments', PDF_PAGE.width / 2, PDF_PAGE.margin + 45)
-
-    // Date range
-    ctx.font = `500 16px ${WEEK_LAYOUT.fontFamily}`
-    ctx.fillStyle = '#6b7280'
-    const fromStr = format(new Date(fromDate + 'T00:00:00'), 'MMM d, yyyy')
-    const toStr = format(new Date(toDate + 'T00:00:00'), 'MMM d, yyyy')
-    ctx.fillText(`${fromStr} - ${toStr}`, PDF_PAGE.width / 2, PDF_PAGE.margin + 75)
-
-    // Empty message
-    ctx.font = `500 18px ${WEEK_LAYOUT.fontFamily}`
-    ctx.fillStyle = '#9ca3af'
-    ctx.fillText('No favorites in this date range', PDF_PAGE.width / 2, PDF_PAGE.height / 2)
-
-    return [{
-      dataUrl: canvas.toDataURL('image/png'),
-      width: canvas.width,
-      height: canvas.height,
-      pageNumber: 1,
-      totalPages: 1,
-    }]
+    console.log('[ViewRenderer] No favorites found - returning empty array')
+    // Return empty array to trigger "No data" message in modal
+    return []
   }
 
   // Calculate card dimensions
@@ -2101,12 +2072,10 @@ export async function renderFavoritesPages(fromDate: string, toDate: string): Pr
     ctx.textAlign = 'center'
     ctx.fillText('Favorite Moments', PDF_PAGE.width / 2, PDF_PAGE.margin + 45)
 
-    // Date range
+    // Export date (not date range since all favorites are included)
     ctx.font = `500 16px ${WEEK_LAYOUT.fontFamily}`
     ctx.fillStyle = '#6b7280'
-    const fromStr = format(new Date(fromDate + 'T00:00:00'), 'MMM d, yyyy')
-    const toStr = format(new Date(toDate + 'T00:00:00'), 'MMM d, yyyy')
-    ctx.fillText(`${fromStr} - ${toStr}`, PDF_PAGE.width / 2, PDF_PAGE.margin + 75)
+    ctx.fillText(`Exported ${format(new Date(), 'MMM d, yyyy')}`, PDF_PAGE.width / 2, PDF_PAGE.margin + 75)
 
     // Count
     ctx.font = `500 14px ${WEEK_LAYOUT.fontFamily}`
