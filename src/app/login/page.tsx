@@ -295,8 +295,8 @@ function LoginFormContent() {
       <div className="w-full max-w-sm">
         {/* Header - outside card */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-3" style={{ fontFamily: 'Caveat, cursive' }}>DayPat</h1>
-          <p className="text-gray-600 text-sm">EVERYDAY DESERVES A PAT.</p>
+          <h1 className="text-5xl font-bold text-[#F27430] mb-3" style={{ fontFamily: 'Caveat, cursive' }}>DayPat</h1>
+          <p className="text-[#F27430] text-sm">EVERYDAY DESERVES A PAT.</p>
         </div>
 
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-8">
@@ -682,8 +682,8 @@ function LoginFallback() {
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex flex-col items-center justify-center px-5 py-8">
       <div className="w-full max-w-sm">
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-3" style={{ fontFamily: 'Caveat, cursive' }}>DayPat</h1>
-          <p className="text-gray-600 text-sm">EVERYDAY DESERVES A PAT.</p>
+          <h1 className="text-5xl font-bold text-[#F27430] mb-3" style={{ fontFamily: 'Caveat, cursive' }}>DayPat</h1>
+          <p className="text-[#F27430] text-sm">EVERYDAY DESERVES A PAT.</p>
         </div>
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-xl p-8">
           <div className="text-center">

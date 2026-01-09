@@ -46,7 +46,7 @@ export default function OnboardingPage() {
       <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 flex items-center justify-center">
         <div className="text-center">
           <AppIcon name="spinner" className="w-8 h-8 animate-spin text-[#F27430] mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: 'Caveat, cursive' }}>
+          <h1 className="text-2xl font-bold text-[#F27430]" style={{ fontFamily: 'Caveat, cursive' }}>
             DayPat
           </h1>
         </div>
