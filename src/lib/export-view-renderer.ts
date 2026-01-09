@@ -1507,7 +1507,7 @@ export async function renderMonthPageImages(year: number, month: number): Promis
 }
 
 // ============================================================
-// MAIN EXPORT FUNCTION
+// MAIN EXPORT FUNCTION (legacy single-view)
 // ============================================================
 
 export type ExportViewType = 'day' | 'week' | 'month'
@@ -1547,5 +1547,503 @@ export async function renderViewPages(options: ViewExportOptions): Promise<PageI
 
     default:
       throw new Error(`Unknown view type: ${viewType}`)
+  }
+}
+
+// ============================================================
+// DATE RANGE EXPORT (new multi-page export with date range)
+// ============================================================
+
+/**
+ * Export mode for PDF generation.
+ * Defines what type of content to export with date range.
+ */
+export type ExportMode = 'day' | 'week' | 'month' | 'favorites'
+
+export interface DateRangeExportOptions {
+  mode: ExportMode
+  fromDate: string // YYYY-MM-DD
+  toDate: string   // YYYY-MM-DD
+}
+
+/**
+ * Generate date range array between from and to (inclusive).
+ */
+function generateDateRange(fromStr: string, toStr: string): Date[] {
+  const dates: Date[] = []
+  const from = new Date(fromStr + 'T00:00:00')
+  const to = new Date(toStr + 'T00:00:00')
+
+  const current = new Date(from)
+  while (current <= to) {
+    dates.push(new Date(current))
+    current.setDate(current.getDate() + 1)
+  }
+
+  return dates
+}
+
+/**
+ * Generate week anchors within date range.
+ * Returns array of week start dates (Mondays).
+ */
+function generateWeekAnchors(fromStr: string, toStr: string): Date[] {
+  const weeks: Date[] = []
+  const from = new Date(fromStr + 'T00:00:00')
+  const to = new Date(toStr + 'T00:00:00')
+
+  // Find first Monday at or before from date
+  let current = startOfWeek(from, { weekStartsOn: 1 })
+
+  while (current <= to) {
+    weeks.push(new Date(current))
+    current = addDays(current, 7)
+  }
+
+  return weeks
+}
+
+/**
+ * Generate month anchors within date range.
+ * Returns array of { year, month } objects.
+ */
+function generateMonthAnchors(fromStr: string, toStr: string): Array<{ year: number; month: number }> {
+  const months: Array<{ year: number; month: number }> = []
+  const from = new Date(fromStr + 'T00:00:00')
+  const to = new Date(toStr + 'T00:00:00')
+
+  let currentYear = from.getFullYear()
+  let currentMonth = from.getMonth()
+
+  while (
+    currentYear < to.getFullYear() ||
+    (currentYear === to.getFullYear() && currentMonth <= to.getMonth())
+  ) {
+    months.push({ year: currentYear, month: currentMonth })
+    currentMonth++
+    if (currentMonth > 11) {
+      currentMonth = 0
+      currentYear++
+    }
+  }
+
+  return months
+}
+
+/**
+ * Render Day pages for a date range.
+ * Each day = 1 PDF page (polaroid style).
+ */
+export async function renderDayRangePages(fromDate: string, toDate: string): Promise<PageImage[]> {
+  console.log('[ViewRenderer] renderDayRangePages:', fromDate, 'to', toDate)
+  const dates = generateDateRange(fromDate, toDate)
+  const allPages: PageImage[] = []
+
+  for (const date of dates) {
+    const dateStr = formatDateString(date)
+    const pages = await renderDayPageImages(dateStr)
+    allPages.push(...pages)
+  }
+
+  // Update page numbers
+  const total = allPages.length
+  return allPages.map((page, i) => ({
+    ...page,
+    pageNumber: i + 1,
+    totalPages: total,
+  }))
+}
+
+/**
+ * Render Week pages for a date range.
+ * Uses multi-page pagination for each week if needed.
+ */
+export async function renderWeekRangePages(fromDate: string, toDate: string): Promise<PageImage[]> {
+  console.log('[ViewRenderer] renderWeekRangePages:', fromDate, 'to', toDate)
+  const weekAnchors = generateWeekAnchors(fromDate, toDate)
+  const allPages: PageImage[] = []
+
+  for (const anchor of weekAnchors) {
+    const pages = await renderWeekPageImages(anchor)
+    allPages.push(...pages)
+  }
+
+  // Update page numbers
+  const total = allPages.length
+  return allPages.map((page, i) => ({
+    ...page,
+    pageNumber: i + 1,
+    totalPages: total,
+  }))
+}
+
+/**
+ * Render Month pages for a date range.
+ * Each month = 1 PDF page (calendar grid).
+ */
+export async function renderMonthRangePages(fromDate: string, toDate: string): Promise<PageImage[]> {
+  console.log('[ViewRenderer] renderMonthRangePages:', fromDate, 'to', toDate)
+  const monthAnchors = generateMonthAnchors(fromDate, toDate)
+  const allPages: PageImage[] = []
+
+  for (const { year, month } of monthAnchors) {
+    const pages = await renderMonthPageImages(year, month)
+    allPages.push(...pages)
+  }
+
+  // Update page numbers
+  const total = allPages.length
+  return allPages.map((page, i) => ({
+    ...page,
+    pageNumber: i + 1,
+    totalPages: total,
+  }))
+}
+
+// ============================================================
+// FAVORITES RENDERER
+// ============================================================
+
+interface FavoriteEntry {
+  id: string
+  date: string
+  entry_date: string
+  praise: string | null
+  photo_path: string | null
+  photoDataUrl?: string
+}
+
+/**
+ * Fetch favorites within date range from Supabase.
+ */
+async function fetchFavoritesInRange(fromDate: string, toDate: string): Promise<FavoriteEntry[]> {
+  const supabase = getSupabaseClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  const { data, error } = await supabase
+    .from('day_entries')
+    .select('id, entry_date, praise, photo_path')
+    .eq('user_id', user.id)
+    .eq('is_liked', true)
+    .gte('entry_date', fromDate)
+    .lte('entry_date', toDate)
+    .order('entry_date', { ascending: false })
+
+  if (error) {
+    console.error('[ViewRenderer] Failed to fetch favorites:', error)
+    return []
+  }
+
+  // Download photos and convert to data URLs
+  const favorites: FavoriteEntry[] = []
+  for (const entry of data || []) {
+    let photoDataUrl: string | undefined
+    if (entry.photo_path) {
+      photoDataUrl = await downloadSupabaseImage(entry.photo_path) || undefined
+    }
+    favorites.push({
+      id: entry.id,
+      date: entry.entry_date,
+      entry_date: entry.entry_date,
+      praise: entry.praise,
+      photo_path: entry.photo_path,
+      photoDataUrl,
+    })
+  }
+
+  return favorites
+}
+
+// Favorites layout constants (matching favorites-modal style)
+const FAVORITES_LAYOUT = {
+  columns: 2,
+  cardWidth: 540,  // (PDF_PAGE.width - margin*2 - gap) / 2
+  cardGap: 24,
+  cardPadding: 16,
+  photoHeight: 320,
+  captionHeight: 80,
+  fontSize: {
+    date: 12,
+    caption: 14,
+  },
+  lineHeight: 1.5,
+}
+
+/**
+ * Draw a single favorite card on canvas.
+ */
+async function drawFavoriteCard(
+  ctx: CanvasRenderingContext2D,
+  entry: FavoriteEntry,
+  x: number,
+  y: number,
+  width: number,
+  rotation: number
+): Promise<number> {
+  const cardHeight = FAVORITES_LAYOUT.cardPadding * 2 + FAVORITES_LAYOUT.photoHeight + FAVORITES_LAYOUT.captionHeight
+
+  ctx.save()
+
+  // Apply slight rotation for polaroid effect
+  const centerX = x + width / 2
+  const centerY = y + cardHeight / 2
+  ctx.translate(centerX, centerY)
+  ctx.rotate((rotation * Math.PI) / 180)
+  ctx.translate(-centerX, -centerY)
+
+  // Card shadow
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.15)'
+  ctx.shadowBlur = 12
+  ctx.shadowOffsetY = 6
+
+  // Card background
+  ctx.fillStyle = 'white'
+  roundedRectPath(ctx, x, y, width, cardHeight, 16)
+  ctx.fill()
+  ctx.shadowColor = 'transparent'
+
+  // Photo
+  const photoX = x + FAVORITES_LAYOUT.cardPadding
+  const photoY = y + FAVORITES_LAYOUT.cardPadding
+  const photoWidth = width - FAVORITES_LAYOUT.cardPadding * 2
+
+  if (entry.photoDataUrl) {
+    try {
+      const img = await loadImage(entry.photoDataUrl)
+      ctx.save()
+      roundedRectPath(ctx, photoX, photoY, photoWidth, FAVORITES_LAYOUT.photoHeight, 12)
+      ctx.clip()
+
+      // Cover fit
+      const imgAspect = img.naturalWidth / img.naturalHeight
+      const areaAspect = photoWidth / FAVORITES_LAYOUT.photoHeight
+      let drawWidth: number, drawHeight: number, drawPx: number, drawPy: number
+
+      if (imgAspect > areaAspect) {
+        drawHeight = FAVORITES_LAYOUT.photoHeight
+        drawWidth = drawHeight * imgAspect
+        drawPx = photoX - (drawWidth - photoWidth) / 2
+        drawPy = photoY
+      } else {
+        drawWidth = photoWidth
+        drawHeight = drawWidth / imgAspect
+        drawPx = photoX
+        drawPy = photoY - (drawHeight - FAVORITES_LAYOUT.photoHeight) / 2
+      }
+
+      ctx.drawImage(img, drawPx, drawPy, drawWidth, drawHeight)
+      ctx.restore()
+    } catch (e) {
+      // Placeholder
+      drawRoundedRect(ctx, photoX, photoY, photoWidth, FAVORITES_LAYOUT.photoHeight, 12, '#f3f4f6')
+    }
+  } else {
+    drawRoundedRect(ctx, photoX, photoY, photoWidth, FAVORITES_LAYOUT.photoHeight, 12, '#f3f4f6')
+  }
+
+  // Heart icon overlay (top-right of photo)
+  const heartSize = 24
+  const heartX = photoX + photoWidth - heartSize / 2 - 12
+  const heartY = photoY + heartSize / 2 + 12
+  drawFontAwesomeHeart(ctx, heartX, heartY, heartSize, true)
+
+  // Date
+  const textY = photoY + FAVORITES_LAYOUT.photoHeight + FAVORITES_LAYOUT.cardPadding
+  ctx.font = `500 ${FAVORITES_LAYOUT.fontSize.date}px ${WEEK_LAYOUT.fontFamily}`
+  ctx.fillStyle = '#9ca3af'
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'top'
+  const dateStr = format(new Date(entry.entry_date + 'T00:00:00'), 'MMM d, yyyy')
+  ctx.fillText(dateStr, photoX, textY)
+
+  // Caption
+  ctx.font = `500 ${FAVORITES_LAYOUT.fontSize.caption}px ${WEEK_LAYOUT.fontFamily}`
+  ctx.fillStyle = '#374151'
+  const captionY = textY + FAVORITES_LAYOUT.fontSize.date * FAVORITES_LAYOUT.lineHeight + 4
+  const caption = entry.praise || 'No caption'
+  const maxCaptionWidth = photoWidth
+  const lines = wrapText(ctx, caption, maxCaptionWidth)
+  const truncatedLines = truncateWithEllipsis(ctx, lines, 2, maxCaptionWidth)
+
+  for (let i = 0; i < truncatedLines.length; i++) {
+    ctx.fillText(
+      truncatedLines[i],
+      photoX,
+      captionY + i * FAVORITES_LAYOUT.fontSize.caption * FAVORITES_LAYOUT.lineHeight
+    )
+  }
+
+  ctx.restore()
+
+  return cardHeight
+}
+
+/**
+ * Render Favorites pages for a date range.
+ * Displays favorites in a 2-column grid layout.
+ */
+export async function renderFavoritesPages(fromDate: string, toDate: string): Promise<PageImage[]> {
+  console.log('[ViewRenderer] renderFavoritesPages:', fromDate, 'to', toDate)
+  await ensureFontsLoaded()
+
+  const favorites = await fetchFavoritesInRange(fromDate, toDate)
+  console.log('[ViewRenderer] Found', favorites.length, 'favorites')
+
+  if (favorites.length === 0) {
+    // Return empty page with message
+    const canvas = document.createElement('canvas')
+    canvas.width = PDF_PAGE.width
+    canvas.height = PDF_PAGE.height
+    const ctx = canvas.getContext('2d')!
+
+    ctx.fillStyle = EXPORT_BACKGROUND_COLOR
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Header
+    ctx.font = `bold 32px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#1f2937'
+    ctx.textAlign = 'center'
+    ctx.fillText('Favorite Moments', PDF_PAGE.width / 2, PDF_PAGE.margin + 45)
+
+    // Date range
+    ctx.font = `500 16px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#6b7280'
+    const fromStr = format(new Date(fromDate + 'T00:00:00'), 'MMM d, yyyy')
+    const toStr = format(new Date(toDate + 'T00:00:00'), 'MMM d, yyyy')
+    ctx.fillText(`${fromStr} - ${toStr}`, PDF_PAGE.width / 2, PDF_PAGE.margin + 75)
+
+    // Empty message
+    ctx.font = `500 18px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#9ca3af'
+    ctx.fillText('No favorites in this date range', PDF_PAGE.width / 2, PDF_PAGE.height / 2)
+
+    return [{
+      dataUrl: canvas.toDataURL('image/png'),
+      width: canvas.width,
+      height: canvas.height,
+      pageNumber: 1,
+      totalPages: 1,
+    }]
+  }
+
+  // Calculate card dimensions
+  const cardWidth = (PDF_PAGE.width - PDF_PAGE.margin * 2 - FAVORITES_LAYOUT.cardGap) / 2
+  const cardHeight = FAVORITES_LAYOUT.cardPadding * 2 + FAVORITES_LAYOUT.photoHeight + FAVORITES_LAYOUT.captionHeight + 20
+
+  // Rotation patterns (subtle, like polaroid stack)
+  const rotations = [-2, 2, 1, -1, -2, 2]
+
+  // Split into pages
+  const cardsPerRow = 2
+  const availableHeight = PDF_PAGE.height - PDF_PAGE.margin * 2 - PDF_PAGE.headerHeight - 40
+  const rowHeight = cardHeight + FAVORITES_LAYOUT.cardGap
+  const rowsPerPage = Math.floor(availableHeight / rowHeight)
+  const cardsPerPage = rowsPerPage * cardsPerRow
+
+  const pages: PageImage[] = []
+  const totalPages = Math.ceil(favorites.length / cardsPerPage)
+
+  for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+    const canvas = document.createElement('canvas')
+    canvas.width = PDF_PAGE.width
+    canvas.height = PDF_PAGE.height
+    const ctx = canvas.getContext('2d')!
+
+    // Background
+    ctx.fillStyle = EXPORT_BACKGROUND_COLOR
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Header
+    ctx.font = `bold 32px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#1f2937'
+    ctx.textAlign = 'center'
+    ctx.fillText('Favorite Moments', PDF_PAGE.width / 2, PDF_PAGE.margin + 45)
+
+    // Date range
+    ctx.font = `500 16px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#6b7280'
+    const fromStr = format(new Date(fromDate + 'T00:00:00'), 'MMM d, yyyy')
+    const toStr = format(new Date(toDate + 'T00:00:00'), 'MMM d, yyyy')
+    ctx.fillText(`${fromStr} - ${toStr}`, PDF_PAGE.width / 2, PDF_PAGE.margin + 75)
+
+    // Count
+    ctx.font = `500 14px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#9ca3af'
+    ctx.fillText(`${favorites.length} saved memories`, PDF_PAGE.width / 2, PDF_PAGE.margin + 100)
+
+    // Page indicator
+    if (totalPages > 1) {
+      ctx.textAlign = 'right'
+      ctx.fillText(`Page ${pageIdx + 1}/${totalPages}`, PDF_PAGE.width - PDF_PAGE.margin, PDF_PAGE.margin + 45)
+    }
+
+    // Draw cards
+    const startIdx = pageIdx * cardsPerPage
+    const endIdx = Math.min(startIdx + cardsPerPage, favorites.length)
+
+    let currentY = PDF_PAGE.margin + PDF_PAGE.headerHeight + 30
+
+    for (let i = startIdx; i < endIdx; i += cardsPerRow) {
+      for (let col = 0; col < cardsPerRow && i + col < endIdx; col++) {
+        const entry = favorites[i + col]
+        const x = PDF_PAGE.margin + col * (cardWidth + FAVORITES_LAYOUT.cardGap)
+        const rotation = rotations[(i + col) % rotations.length]
+
+        await drawFavoriteCard(ctx, entry, x, currentY, cardWidth, rotation)
+      }
+      currentY += cardHeight + FAVORITES_LAYOUT.cardGap
+    }
+
+    // Footer
+    ctx.font = `500 12px ${WEEK_LAYOUT.fontFamily}`
+    ctx.fillStyle = '#9ca3af'
+    ctx.textAlign = 'left'
+    ctx.fillText('DayPat', PDF_PAGE.margin, PDF_PAGE.height - PDF_PAGE.margin + 20)
+
+    ctx.textAlign = 'right'
+    ctx.fillText(
+      format(new Date(), 'MMM d, yyyy'),
+      PDF_PAGE.width - PDF_PAGE.margin,
+      PDF_PAGE.height - PDF_PAGE.margin + 20
+    )
+
+    pages.push({
+      dataUrl: canvas.toDataURL('image/png'),
+      width: canvas.width,
+      height: canvas.height,
+      pageNumber: pageIdx + 1,
+      totalPages,
+    })
+  }
+
+  return pages
+}
+
+/**
+ * Main entry point for date range export.
+ * Renders pages based on export mode and date range.
+ */
+export async function buildPdfPages(options: DateRangeExportOptions): Promise<PageImage[]> {
+  const { mode, fromDate, toDate } = options
+
+  console.log('[ViewRenderer] buildPdfPages:', { mode, fromDate, toDate })
+
+  switch (mode) {
+    case 'day':
+      return renderDayRangePages(fromDate, toDate)
+
+    case 'week':
+      return renderWeekRangePages(fromDate, toDate)
+
+    case 'month':
+      return renderMonthRangePages(fromDate, toDate)
+
+    case 'favorites':
+      return renderFavoritesPages(fromDate, toDate)
+
+    default:
+      throw new Error(`Unknown export mode: ${mode}`)
   }
 }
