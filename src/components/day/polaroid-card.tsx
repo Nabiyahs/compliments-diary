@@ -80,9 +80,6 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
   // UI state
   const [playStampAnimation, setPlayStampAnimation] = useState(false)
   const [selectedStickerIndex, setSelectedStickerIndex] = useState<number | null>(null)
-  const [showPhotoSourceModal, setShowPhotoSourceModal] = useState(false)
-  const cameraInputRef = useRef<HTMLInputElement>(null)
-  const galleryInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoAreaRef = useRef<HTMLDivElement>(null)
   const stickerRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -106,12 +103,9 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
     }
   }, [isEditing]) // Note: savedStickers intentionally not in deps to avoid re-cloning during edit
 
-  // Show stamp if entry exists (saved entry) AND not in edit mode
-  // Now shows for text-only entries as well as photo entries
+  // Show stamp if entry has a photo (saved entry) AND not in edit mode
   // Stamp hides when editing, reappears with animation on save success
-  const showStamp = Boolean(dayCard?.id) && !isEditing
-  // Center the stamp when there's no photo (text-only entries)
-  const stampCentered = showStamp && !dayCard?.photo_path
+  const showStamp = Boolean(dayCard?.photo_path) && !isEditing
 
   // Sync praise draft when dayCard changes (e.g., date navigation)
   // Only reset playStampAnimation when DATE changes (navigation), not when dayCard refreshes after save
@@ -189,9 +183,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
       setTimeout(() => setUploadError(null), 5000)
     } finally {
       setUploading(false)
-      // Reset all file inputs to allow re-selecting the same file
-      if (cameraInputRef.current) cameraInputRef.current.value = ''
-      if (galleryInputRef.current) galleryInputRef.current.value = ''
+      // Reset file input to allow re-selecting the same file
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -219,15 +211,13 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
     if (DEBUG) console.log('[PolaroidCard] Save clicked - starting save flow')
 
     // Determine the effective photo path (pending new photo or existing photo)
-    const effectivePhotoPath = pendingPhotoPath || (pendingPhotoDelete ? null : dayCard?.photo_path)
+    const effectivePhotoPath = pendingPhotoPath || dayCard?.photo_path
 
-    // Photo is now OPTIONAL - can save with just caption
-    // But require at least something to save (photo or caption)
-    const effectiveCaption = praiseDraft.trim()
-    if (!effectivePhotoPath && !effectiveCaption) {
-      setUploadError('Please add a photo or text')
+    // REQUIRED: Photo must exist to save entry
+    if (!effectivePhotoPath) {
+      setUploadError('Please add a photo first')
       setTimeout(() => setUploadError(null), 3000)
-      if (DEBUG) console.log('[PolaroidCard] Save blocked - no photo and no caption')
+      if (DEBUG) console.log('[PolaroidCard] Save blocked - no photo')
       return
     }
 
@@ -299,25 +289,9 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
     setPlayStampAnimation(true)
   }
 
-  // Open photo source selection modal (only in edit mode)
-  const handlePhotoAreaClickForUpload = () => {
+  // Open file picker directly (only in edit mode)
+  const handlePhotoUploadClick = () => {
     if (!isEditing) return
-    setShowPhotoSourceModal(true)
-  }
-
-  // Photo source selection handlers
-  const handleCameraSelect = () => {
-    setShowPhotoSourceModal(false)
-    cameraInputRef.current?.click()
-  }
-
-  const handleGallerySelect = () => {
-    setShowPhotoSourceModal(false)
-    galleryInputRef.current?.click()
-  }
-
-  const handleFileSelect = () => {
-    setShowPhotoSourceModal(false)
     fileInputRef.current?.click()
   }
 
@@ -411,7 +385,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                 alt="Day photo"
                 className="w-full h-[280px] object-cover"
                 crossOrigin={pendingPhotoPreview ? undefined : "anonymous"}
-                onClick={isEditing ? handlePhotoAreaClickForUpload : undefined}
+                onClick={isEditing ? handlePhotoUploadClick : undefined}
                 style={{ cursor: isEditing ? 'pointer' : 'default' }}
               />
               {/* DayPat watermark - only visible during export (controlled by CSS) */}
@@ -424,7 +398,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             </div>
           ) : (
             // Empty state - camera icon CTA centered in photo area
-            // Clickable to show photo source selection (enters edit mode if needed)
+            // Clickable to open file picker (enters edit mode if needed)
             <button
               onClick={() => {
                 if (!isEditing && !isFutureDate) {
@@ -433,8 +407,8 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                   onEditingChange?.(true)
                   setPraiseDraft(dayCard?.praise || '')
                 }
-                // Show photo source selection modal after a brief delay
-                setTimeout(() => setShowPhotoSourceModal(true), 50)
+                // Open file picker after a brief delay to ensure edit mode is set
+                setTimeout(() => fileInputRef.current?.click(), 50)
               }}
               disabled={uploading || isFutureDate}
               className={cn(
@@ -630,30 +604,14 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             </button>
           )}
 
-          {/* Stamp overlay - positioned inside photo area (bottom-right, or centered if no photo) */}
+          {/* Stamp overlay - positioned inside photo area (bottom-right) */}
           <StampOverlay
             show={showStamp}
             playAnimation={playStampAnimation}
             onAnimationComplete={() => setPlayStampAnimation(false)}
-            centered={stampCentered}
           />
 
-          {/* Hidden file inputs for different sources */}
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          {/* Hidden file input for photo upload */}
           <input
             ref={fileInputRef}
             type="file"
@@ -818,40 +776,6 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
       {/* Sticker picker bottom sheet - visible in edit mode */}
       {isEditing && (
         <StickerBottomSheet onStickerSelect={addSticker} />
-      )}
-
-      {/* Photo source selection modal - action sheet style */}
-      {showPhotoSourceModal && (
-        <div
-          className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center"
-          onClick={() => setShowPhotoSourceModal(false)}
-        >
-          <div
-            className="bg-white w-full max-w-md rounded-t-2xl pb-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-4 space-y-2">
-              <button
-                onClick={handleCameraSelect}
-                className="w-full py-4 text-center text-lg font-medium text-gray-800 hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                사진 촬영
-              </button>
-              <button
-                onClick={handleGallerySelect}
-                className="w-full py-4 text-center text-lg font-medium text-gray-800 hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                사진 보관함
-              </button>
-              <button
-                onClick={handleFileSelect}
-                className="w-full py-4 text-center text-lg font-medium text-gray-800 hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                파일 보관함
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   )
