@@ -80,9 +80,6 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
   // UI state
   const [playStampAnimation, setPlayStampAnimation] = useState(false)
   const [selectedStickerIndex, setSelectedStickerIndex] = useState<number | null>(null)
-  const [showPhotoSourceModal, setShowPhotoSourceModal] = useState(false)
-  const cameraInputRef = useRef<HTMLInputElement>(null)
-  const galleryInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const photoAreaRef = useRef<HTMLDivElement>(null)
   const stickerRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -186,9 +183,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
       setTimeout(() => setUploadError(null), 5000)
     } finally {
       setUploading(false)
-      // Reset all file inputs to allow re-selecting the same file
-      if (cameraInputRef.current) cameraInputRef.current.value = ''
-      if (galleryInputRef.current) galleryInputRef.current.value = ''
+      // Reset file input to allow re-selecting the same file
       if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
@@ -294,25 +289,9 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
     setPlayStampAnimation(true)
   }
 
-  // Open photo source selection modal (only in edit mode)
-  const handlePhotoAreaClickForUpload = () => {
+  // Open file picker directly (only in edit mode)
+  const handlePhotoUploadClick = () => {
     if (!isEditing) return
-    setShowPhotoSourceModal(true)
-  }
-
-  // Photo source selection handlers
-  const handleCameraSelect = () => {
-    setShowPhotoSourceModal(false)
-    cameraInputRef.current?.click()
-  }
-
-  const handleGallerySelect = () => {
-    setShowPhotoSourceModal(false)
-    galleryInputRef.current?.click()
-  }
-
-  const handleFileSelect = () => {
-    setShowPhotoSourceModal(false)
     fileInputRef.current?.click()
   }
 
@@ -406,7 +385,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                 alt="Day photo"
                 className="w-full h-[280px] object-cover"
                 crossOrigin={pendingPhotoPreview ? undefined : "anonymous"}
-                onClick={isEditing ? handlePhotoAreaClickForUpload : undefined}
+                onClick={isEditing ? handlePhotoUploadClick : undefined}
                 style={{ cursor: isEditing ? 'pointer' : 'default' }}
               />
               {/* DayPat watermark - only visible during export (controlled by CSS) */}
@@ -419,7 +398,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             </div>
           ) : (
             // Empty state - camera icon CTA centered in photo area
-            // Clickable to show photo source selection (enters edit mode if needed)
+            // Clickable to open file picker (enters edit mode if needed)
             <button
               onClick={() => {
                 if (!isEditing && !isFutureDate) {
@@ -428,8 +407,8 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
                   onEditingChange?.(true)
                   setPraiseDraft(dayCard?.praise || '')
                 }
-                // Show photo source selection modal after a brief delay
-                setTimeout(() => setShowPhotoSourceModal(true), 50)
+                // Open file picker after a brief delay to ensure edit mode is set
+                setTimeout(() => fileInputRef.current?.click(), 50)
               }}
               disabled={uploading || isFutureDate}
               className={cn(
@@ -632,22 +611,7 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
             onAnimationComplete={() => setPlayStampAnimation(false)}
           />
 
-          {/* Hidden file inputs for different sources */}
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          {/* Hidden file input for photo upload */}
           <input
             ref={fileInputRef}
             type="file"
@@ -812,40 +776,6 @@ export const PolaroidCard = forwardRef<PolaroidCardRef, PolaroidCardProps>(funct
       {/* Sticker picker bottom sheet - visible in edit mode */}
       {isEditing && (
         <StickerBottomSheet onStickerSelect={addSticker} />
-      )}
-
-      {/* Photo source selection modal - action sheet style */}
-      {showPhotoSourceModal && (
-        <div
-          className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center"
-          onClick={() => setShowPhotoSourceModal(false)}
-        >
-          <div
-            className="bg-white w-full max-w-md rounded-t-2xl pb-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-4 space-y-2">
-              <button
-                onClick={handleCameraSelect}
-                className="w-full py-4 text-center text-lg font-medium text-gray-800 hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                사진 촬영
-              </button>
-              <button
-                onClick={handleGallerySelect}
-                className="w-full py-4 text-center text-lg font-medium text-gray-800 hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                사진 보관함
-              </button>
-              <button
-                onClick={handleFileSelect}
-                className="w-full py-4 text-center text-lg font-medium text-gray-800 hover:bg-gray-50 rounded-xl transition-colors"
-              >
-                파일 보관함
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   )
